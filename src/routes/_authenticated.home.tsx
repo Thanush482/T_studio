@@ -12,7 +12,7 @@ function HomePage() {
   const { data: profile } = useQuery({
     queryKey: ["profile"],
     queryFn: async () => {
-      const { data } = await supabase.from("profiles").select("display_name, credits, tier").maybeSingle();
+      const { data } = await supabase.from("profiles").select("display_name").maybeSingle();
       return data;
     },
   });
@@ -25,18 +25,9 @@ function HomePage() {
       </header>
 
       <div className="rounded-2xl border border-border bg-gradient-to-br from-primary/20 via-card to-accent/10 p-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-wider text-muted-foreground">Credits</p>
-            <p className="font-display text-3xl font-bold">{profile?.credits ?? 0}</p>
-          </div>
-          <span className="rounded-full bg-primary/20 px-3 py-1 text-xs font-medium text-primary">
-            {(profile?.tier ?? "free").toUpperCase()}
-          </span>
-        </div>
-        <Link to="/profile" className="mt-3 inline-block text-sm text-primary underline">
-          Upgrade plan →
-        </Link>
+        <p className="text-xs uppercase tracking-wider text-muted-foreground">Free preview</p>
+        <p className="font-display text-2xl font-bold">Create without limits</p>
+        <p className="mt-1 text-sm text-muted-foreground">All tools are free while we're in preview.</p>
       </div>
 
       <section>
@@ -45,7 +36,7 @@ function HomePage() {
         </h2>
         <div className="grid grid-cols-2 gap-3">
           <Tile to="/create" icon={<Sparkles className="h-6 w-6" />} title="Text to Image" desc="Describe an image" />
-          <Tile to="/create" icon={<Wand2 className="h-6 w-6" />} title="Edit with prompt" desc="Transform a photo" />
+          <Tile to="/create" search={{ mode: "edit" } as never} icon={<Wand2 className="h-6 w-6" />} title="Edit with prompt" desc="Transform a photo" />
           <Tile to="/library" icon={<ImageIcon className="h-6 w-6" />} title="Your library" desc="All your creations" />
           <Tile to="/profile" icon={<Sparkles className="h-6 w-6" />} title="More" desc="Coming soon" />
         </div>
