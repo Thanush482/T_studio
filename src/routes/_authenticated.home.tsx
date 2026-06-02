@@ -36,7 +36,7 @@ function HomePage() {
         </h2>
         <div className="grid grid-cols-2 gap-3">
           <Tile to="/create" icon={<Sparkles className="h-6 w-6" />} title="Text to Image" desc="Describe an image" />
-          <Tile to="/create" search={{ mode: "edit" } as never} icon={<Wand2 className="h-6 w-6" />} title="Edit with prompt" desc="Transform a photo" />
+          <Tile to="/create" icon={<Wand2 className="h-6 w-6" />} title="Edit with prompt" desc="Transform a photo" />
           <Tile to="/library" icon={<ImageIcon className="h-6 w-6" />} title="Your library" desc="All your creations" />
           <Tile to="/profile" icon={<Sparkles className="h-6 w-6" />} title="More" desc="Coming soon" />
         </div>
