@@ -82,10 +82,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "theme-color", content: "#0a0820" },
       { title: "T_AI Studio — AI Image & Video Creation" },
       { name: "description", content: "Create, edit, and transform images and videos with AI. Mobile-first creative studio." },
-      { property: "og:title", content: "T_AI Studio" },
-      { property: "og:description", content: "AI image & video creation studio." },
+      { property: "og:title", content: "T_AI Studio — AI Image & Video Creation" },
+      { property: "og:description", content: "Create, edit, and transform images and videos with AI. Mobile-first creative studio." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "T_AI Studio — AI Image & Video Creation" },
+      { name: "twitter:description", content: "Create, edit, and transform images and videos with AI. Mobile-first creative studio." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/1d41f512-1804-48b1-9ba6-58941ba534f6" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/1d41f512-1804-48b1-9ba6-58941ba534f6" },
     ],
     links: [
       {
