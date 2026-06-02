@@ -1,13 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
-import { Sparkles, Loader2, Download } from "lucide-react";
+import { useRef, useState } from "react";
+import { Sparkles, Loader2, Download, Wand2, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { generateImage } from "@/lib/ai.functions";
+import { editImage, generateImage } from "@/lib/ai.functions";
 
 export const Route = createFileRoute("/_authenticated/create")({
   head: () => ({ meta: [{ title: "Create — T_AI Studio" }] }),
@@ -21,30 +21,108 @@ const SUGGESTIONS = [
 ];
 
 function CreatePage() {
+  const [mode, setMode] = useState<"generate" | "edit">("generate");
   const [prompt, setPrompt] = useState("");
   const [image, setImage] = useState<string | null>(null);
+  const [sourceDataUrl, setSourceDataUrl] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
-  const run = useServerFn(generateImage);
+  const runGen = useServerFn(generateImage);
+  const runEdit = useServerFn(editImage);
 
   const mutation = useMutation({
-    mutationFn: (p: string) => run({ data: { prompt: p } }),
+    mutationFn: async (p: string) => {
+      if (mode === "edit") {
+        if (!sourceDataUrl) throw new Error("Upload a photo to edit first.");
+        return runEdit({ data: { prompt: p, imageDataUrl: sourceDataUrl } });
+      }
+      return runGen({ data: { prompt: p } });
+    },
     onSuccess: (res) => {
       if (res?.imageUrl) setImage(res.imageUrl);
-      queryClient.invalidateQueries({ queryKey: ["profile"] });
       queryClient.invalidateQueries({ queryKey: ["library"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
 
+  function onPickFile(file: File | undefined) {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file.");
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error("Image must be under 8MB.");
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setSourceDataUrl(typeof reader.result === "string" ? reader.result : null);
+    reader.readAsDataURL(file);
+  }
+
+  const suggestions = mode === "generate"
+    ? SUGGESTIONS
+    : ["Replace the background with a sunset beach", "Make it a watercolor painting", "Add soft cinematic lighting"];
+
   return (
     <div className="space-y-5">
       <header>
         <h1 className="font-display text-2xl font-bold">Create</h1>
-        <p className="text-sm text-muted-foreground">Describe an image. We'll generate it.</p>
+        <p className="text-sm text-muted-foreground">
+          {mode === "generate" ? "Describe an image. We'll generate it." : "Upload a photo and describe how to transform it."}
+        </p>
       </header>
 
+      <div className="grid grid-cols-2 gap-2 rounded-2xl border border-border bg-card p-1">
+        <button
+          onClick={() => { setMode("generate"); setImage(null); }}
+          className={`flex items-center justify-center gap-2 rounded-xl py-2 text-sm font-medium transition-colors ${mode === "generate" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+        >
+          <Sparkles className="h-4 w-4" /> Generate
+        </button>
+        <button
+          onClick={() => { setMode("edit"); setImage(null); }}
+          className={`flex items-center justify-center gap-2 rounded-xl py-2 text-sm font-medium transition-colors ${mode === "edit" ? "bg-primary text-primary-foreground" : "text-muted-foreground"}`}
+        >
+          <Wand2 className="h-4 w-4" /> Edit photo
+        </button>
+      </div>
+
+      {mode === "edit" && (
+        <div>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => onPickFile(e.target.files?.[0])}
+          />
+          {sourceDataUrl ? (
+            <div className="relative overflow-hidden rounded-2xl border border-border bg-card">
+              <img src={sourceDataUrl} alt="Source upload" className="max-h-64 w-full object-contain" />
+              <button
+                onClick={() => setSourceDataUrl(null)}
+                className="absolute right-2 top-2 rounded-full bg-background/80 p-1.5 text-foreground backdrop-blur"
+                aria-label="Remove image"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => fileRef.current?.click()}
+              className="flex w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-card py-10 text-sm text-muted-foreground hover:border-primary/50 hover:text-foreground"
+            >
+              <Upload className="h-6 w-6" />
+              Tap to upload a photo
+              <span className="text-[11px]">JPG / PNG · up to 8MB</span>
+            </button>
+          )}
+        </div>
+      )}
+
       <Textarea
-        placeholder="A cinematic shot of…"
+        placeholder={mode === "generate" ? "A cinematic shot of…" : "Change the background to a snowy mountain…"}
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
         rows={4}
@@ -52,26 +130,28 @@ function CreatePage() {
       />
 
       <div className="flex flex-wrap gap-2">
-        {SUGGESTIONS.map((s) => (
+        {suggestions.map((s) => (
           <button
             key={s}
             onClick={() => setPrompt(s)}
             className="rounded-full border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground hover:border-primary/50 hover:text-foreground"
           >
-            {s.slice(0, 32)}…
+            {s.length > 32 ? `${s.slice(0, 32)}…` : s}
           </button>
         ))}
       </div>
 
       <Button
         onClick={() => mutation.mutate(prompt.trim())}
-        disabled={mutation.isPending || prompt.trim().length < 3}
+        disabled={mutation.isPending || prompt.trim().length < 3 || (mode === "edit" && !sourceDataUrl)}
         className="h-12 w-full text-base"
       >
         {mutation.isPending ? (
-          <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating…</>
+          <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> {mode === "edit" ? "Editing…" : "Generating…"}</>
         ) : (
-          <><Sparkles className="mr-2 h-4 w-4" /> Generate (1 credit)</>
+          mode === "edit"
+            ? <><Wand2 className="mr-2 h-4 w-4" /> Edit photo</>
+            : <><Sparkles className="mr-2 h-4 w-4" /> Generate</>
         )}
       </Button>
 

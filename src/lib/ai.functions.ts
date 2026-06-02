@@ -22,6 +22,11 @@ const InputSchema = z.object({
   prompt: z.string().min(3).max(2000),
 });
 
+const EditSchema = z.object({
+  prompt: z.string().min(3).max(2000),
+  imageDataUrl: z.string().min(20).max(15_000_000), // base64 data URL, ~10MB cap
+});
+
 export const generateImage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => InputSchema.parse(d))
@@ -30,17 +35,7 @@ export const generateImage = createServerFn({ method: "POST" })
     const apiKey = process.env.LOVABLE_API_KEY;
     if (!apiKey) throw new Error("AI gateway not configured");
 
-    // 1. Credit check
-    const { data: profile } = await supabaseAdmin
-      .from("profiles")
-      .select("credits, tier")
-      .eq("user_id", userId)
-      .single();
-    if (!profile || profile.credits <= 0) {
-      throw new Error("You're out of credits. Upgrade your plan to keep creating.");
-    }
-
-    // 2. Moderation
+    // 1. Moderation
     const modRes = await fetch(`${GATEWAY}/chat/completions`, {
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
@@ -72,7 +67,7 @@ export const generateImage = createServerFn({ method: "POST" })
       throw new Error("This prompt violates our safety policy. Please try a different idea.");
     }
 
-    // 3. Generate
+    // 2. Generate
     const watermarkedPrompt = `${data.prompt}\n\n(Add a small "T_AI Studio" watermark in the bottom-right corner.)`;
     const genRes = await fetch(`${GATEWAY}/images/generations`, {
       method: "POST",
@@ -107,7 +102,7 @@ export const generateImage = createServerFn({ method: "POST" })
       }
     }
 
-    // 4. Record generation + decrement credit
+    // 3. Record generation (free preview — no credit decrement)
     const { data: row } = await supabaseAdmin
       .from("generations")
       .insert({
@@ -123,15 +118,124 @@ export const generateImage = createServerFn({ method: "POST" })
       .select("id")
       .single();
 
-    await supabaseAdmin.from("credit_ledger").insert({
-      user_id: userId,
-      delta: -1,
-      reason: "text_to_image",
-      generation_id: row?.id ?? null,
-    });
-
     return {
       id: row?.id,
       imageUrl: storageUrl ?? url ?? (b64 ? `data:image/png;base64,${b64}` : null),
+    };
+  });
+
+export const editImage = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => EditSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    const { userId } = context;
+    const apiKey = process.env.LOVABLE_API_KEY;
+    if (!apiKey) throw new Error("AI gateway not configured");
+
+    if (!data.imageDataUrl.startsWith("data:image/")) {
+      throw new Error("Invalid image upload.");
+    }
+
+    // Moderation on prompt
+    const modRes = await fetch(`${GATEWAY}/chat/completions`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash-lite",
+        messages: [
+          { role: "system", content: MODERATION_SYSTEM },
+          { role: "user", content: data.prompt },
+        ],
+      }),
+    });
+    if (!modRes.ok) {
+      if (modRes.status === 429) throw new Error("Too many requests — please slow down.");
+      if (modRes.status === 402) throw new Error("AI credits exhausted. Try again later.");
+      throw new Error("Moderation service unavailable");
+    }
+    const modJson = await modRes.json();
+    const verdict = (modJson.choices?.[0]?.message?.content ?? "").trim().toLowerCase();
+    const blocked = verdict.startsWith("block");
+
+    await supabaseAdmin.from("moderation_logs").insert({
+      user_id: userId,
+      verdict: blocked ? "blocked" : "allowed",
+      prompt: data.prompt,
+      raw_response: { model: "google/gemini-2.5-flash-image", response: verdict, tool: "edit_image" },
+    });
+    if (blocked) {
+      throw new Error("This edit prompt violates our safety policy.");
+    }
+
+    // Edit via gemini-2.5-flash-image multimodal chat completions
+    const watermarkedPrompt = `${data.prompt}\n\nKeep a small "T_AI Studio" watermark in the bottom-right corner of the output image.`;
+    const editRes = await fetch(`${GATEWAY}/chat/completions`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash-image",
+        modalities: ["image", "text"],
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "text", text: watermarkedPrompt },
+              { type: "image_url", image_url: { url: data.imageDataUrl } },
+            ],
+          },
+        ],
+      }),
+    });
+    if (!editRes.ok) {
+      if (editRes.status === 429) throw new Error("Too many requests — please slow down.");
+      if (editRes.status === 402) throw new Error("AI credits exhausted. Try again later.");
+      throw new Error(`Image edit failed (${editRes.status})`);
+    }
+    const editJson = await editRes.json();
+    const message = editJson.choices?.[0]?.message;
+    const imageUrlOut: string | undefined =
+      message?.images?.[0]?.image_url?.url ??
+      message?.images?.[0]?.url ??
+      undefined;
+
+    if (!imageUrlOut) throw new Error("The model didn't return an image. Try a different prompt.");
+
+    // Upload to storage if it's a data URL
+    let storageUrl: string | null = null;
+    let storedPath: string | null = null;
+    if (imageUrlOut.startsWith("data:")) {
+      const b64 = imageUrlOut.split(",")[1] ?? "";
+      const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+      const fileName = `${userId}/${crypto.randomUUID()}.png`;
+      const { error: upErr } = await supabaseAdmin.storage
+        .from("generations")
+        .upload(fileName, bytes, { contentType: "image/png", upsert: false });
+      if (!upErr) {
+        storedPath = fileName;
+        const { data: signed } = await supabaseAdmin.storage
+          .from("generations")
+          .createSignedUrl(fileName, 60 * 60 * 24 * 7);
+        storageUrl = signed?.signedUrl ?? null;
+      }
+    }
+
+    const { data: row } = await supabaseAdmin
+      .from("generations")
+      .insert({
+        user_id: userId,
+        tool: "image_edit",
+        prompt: data.prompt,
+        model: "google/gemini-2.5-flash-image",
+        output_asset_path: storedPath,
+        output_url: storedPath ? null : imageUrlOut,
+        status: "completed",
+        moderation_result: { verdict },
+      })
+      .select("id")
+      .single();
+
+    return {
+      id: row?.id,
+      imageUrl: storageUrl ?? imageUrlOut,
     };
   });
