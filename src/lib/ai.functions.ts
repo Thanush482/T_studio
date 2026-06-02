@@ -63,10 +63,9 @@ export const generateImage = createServerFn({ method: "POST" })
 
     await supabaseAdmin.from("moderation_logs").insert({
       user_id: userId,
-      content_type: "prompt",
       verdict: blocked ? "blocked" : "allowed",
-      model: "google/gemini-2.5-flash-lite",
-      raw: { prompt: data.prompt, response: verdict },
+      prompt: data.prompt,
+      raw_response: { model: "google/gemini-2.5-flash-lite", response: verdict },
     });
 
     if (blocked) {
@@ -113,12 +112,13 @@ export const generateImage = createServerFn({ method: "POST" })
       .from("generations")
       .insert({
         user_id: userId,
-        kind: "text_to_image",
+        tool: "text_to_image",
         prompt: data.prompt,
         model: "google/gemini-2.5-flash-image",
-        storage_path: b64 ? fileName : null,
+        output_asset_path: b64 ? fileName : null,
+        output_url: !b64 && url ? url : null,
         status: "completed",
-        metadata: { has_watermark: true },
+        moderation_result: { verdict },
       })
       .select("id")
       .single();
