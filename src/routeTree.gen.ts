@@ -14,7 +14,9 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LegalTermsRouteImport } from './routes/legal.terms'
+import { Route as LegalTakedownRouteImport } from './routes/legal.takedown'
 import { Route as LegalPrivacyRouteImport } from './routes/legal.privacy'
+import { Route as LegalAcceptableUseRouteImport } from './routes/legal.acceptable-use'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated.profile'
 import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated.library'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated.home'
@@ -44,9 +46,19 @@ const LegalTermsRoute = LegalTermsRouteImport.update({
   path: '/legal/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LegalTakedownRoute = LegalTakedownRouteImport.update({
+  id: '/legal/takedown',
+  path: '/legal/takedown',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LegalPrivacyRoute = LegalPrivacyRouteImport.update({
   id: '/legal/privacy',
   path: '/legal/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalAcceptableUseRoute = LegalAcceptableUseRouteImport.update({
+  id: '/legal/acceptable-use',
+  path: '/legal/acceptable-use',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
@@ -78,7 +90,9 @@ export interface FileRoutesByFullPath {
   '/home': typeof AuthenticatedHomeRoute
   '/library': typeof AuthenticatedLibraryRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/legal/acceptable-use': typeof LegalAcceptableUseRoute
   '/legal/privacy': typeof LegalPrivacyRoute
+  '/legal/takedown': typeof LegalTakedownRoute
   '/legal/terms': typeof LegalTermsRoute
 }
 export interface FileRoutesByTo {
@@ -89,7 +103,9 @@ export interface FileRoutesByTo {
   '/home': typeof AuthenticatedHomeRoute
   '/library': typeof AuthenticatedLibraryRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/legal/acceptable-use': typeof LegalAcceptableUseRoute
   '/legal/privacy': typeof LegalPrivacyRoute
+  '/legal/takedown': typeof LegalTakedownRoute
   '/legal/terms': typeof LegalTermsRoute
 }
 export interface FileRoutesById {
@@ -102,7 +118,9 @@ export interface FileRoutesById {
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/library': typeof AuthenticatedLibraryRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/legal/acceptable-use': typeof LegalAcceptableUseRoute
   '/legal/privacy': typeof LegalPrivacyRoute
+  '/legal/takedown': typeof LegalTakedownRoute
   '/legal/terms': typeof LegalTermsRoute
 }
 export interface FileRouteTypes {
@@ -115,7 +133,9 @@ export interface FileRouteTypes {
     | '/home'
     | '/library'
     | '/profile'
+    | '/legal/acceptable-use'
     | '/legal/privacy'
+    | '/legal/takedown'
     | '/legal/terms'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -126,7 +146,9 @@ export interface FileRouteTypes {
     | '/home'
     | '/library'
     | '/profile'
+    | '/legal/acceptable-use'
     | '/legal/privacy'
+    | '/legal/takedown'
     | '/legal/terms'
   id:
     | '__root__'
@@ -138,7 +160,9 @@ export interface FileRouteTypes {
     | '/_authenticated/home'
     | '/_authenticated/library'
     | '/_authenticated/profile'
+    | '/legal/acceptable-use'
     | '/legal/privacy'
+    | '/legal/takedown'
     | '/legal/terms'
   fileRoutesById: FileRoutesById
 }
@@ -147,7 +171,9 @@ export interface RootRouteChildren {
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
+  LegalAcceptableUseRoute: typeof LegalAcceptableUseRoute
   LegalPrivacyRoute: typeof LegalPrivacyRoute
+  LegalTakedownRoute: typeof LegalTakedownRoute
   LegalTermsRoute: typeof LegalTermsRoute
 }
 
@@ -188,11 +214,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LegalTermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/legal/takedown': {
+      id: '/legal/takedown'
+      path: '/legal/takedown'
+      fullPath: '/legal/takedown'
+      preLoaderRoute: typeof LegalTakedownRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/legal/privacy': {
       id: '/legal/privacy'
       path: '/legal/privacy'
       fullPath: '/legal/privacy'
       preLoaderRoute: typeof LegalPrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal/acceptable-use': {
+      id: '/legal/acceptable-use'
+      path: '/legal/acceptable-use'
+      fullPath: '/legal/acceptable-use'
+      preLoaderRoute: typeof LegalAcceptableUseRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/profile': {
@@ -249,7 +289,9 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
+  LegalAcceptableUseRoute: LegalAcceptableUseRoute,
   LegalPrivacyRoute: LegalPrivacyRoute,
+  LegalTakedownRoute: LegalTakedownRoute,
   LegalTermsRoute: LegalTermsRoute,
 }
 export const routeTree = rootRouteImport
