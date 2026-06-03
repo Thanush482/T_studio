@@ -50,6 +50,9 @@ function LoginPage() {
         <div className="space-y-2">
           <Label htmlFor="password">Password</Label>
           <Input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
+          <div className="text-right">
+            <Link to="/reset-password" className="text-xs text-primary underline">Forgot password?</Link>
+          </div>
         </div>
         <Button type="submit" className="h-11 w-full" disabled={loading}>
           {loading ? "Signing in…" : "Sign in"}
