@@ -50,7 +50,12 @@ function LibraryPage() {
             <div key={g.id} className="overflow-hidden rounded-xl border border-border bg-card">
               <div className="aspect-square bg-muted">
                 {g.signedUrl ? (
-                  <img src={g.signedUrl} alt={g.prompt} className="h-full w-full object-cover" loading="lazy" />
+                  <div className="relative h-full w-full">
+                    <img src={g.signedUrl} alt={g.prompt} className="h-full w-full object-cover" loading="lazy" />
+                    <span className="absolute left-1.5 top-1.5 rounded-full bg-background/80 px-2 py-0.5 text-[10px] font-medium text-foreground backdrop-blur">
+                      AI-generated
+                    </span>
+                  </div>
                 ) : null}
               </div>
               <p className="line-clamp-2 px-2 py-1.5 text-[11px] text-muted-foreground">{g.prompt}</p>
