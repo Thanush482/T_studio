@@ -16,7 +16,7 @@ const CATEGORIES = [
   { value: "deepfake", label: "Non-consensual deepfake / impersonation" },
   { value: "csam", label: "Child safety" },
   { value: "copyright", label: "Copyright infringement" },
-  { value: "identity", label: "Identity / likeness misuse" },
+  { value: "identity_theft", label: "Identity / likeness misuse" },
   { value: "harassment", label: "Harassment or hate" },
   { value: "other", label: "Other" },
 ];

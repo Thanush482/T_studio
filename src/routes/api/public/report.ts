@@ -7,7 +7,7 @@ const ReportSchema = z.object({
   reporter_email: z.string().email().max(254),
   reporter_name: z.string().min(1).max(200).optional(),
   reported_generation_id: z.string().uuid().optional(),
-  category: z.enum(["deepfake", "copyright", "identity", "harassment", "csam", "other"]),
+  category: z.enum(["deepfake", "copyright", "identity_theft", "harassment", "csam", "other"]),
   description: z.string().min(10).max(5000),
   evidence_url: z.string().url().max(2000).optional(),
 });
