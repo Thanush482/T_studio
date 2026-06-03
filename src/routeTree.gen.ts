@@ -10,19 +10,34 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as ReportRouteImport } from './routes/report'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LegalTermsRouteImport } from './routes/legal.terms'
+import { Route as LegalTakedownRouteImport } from './routes/legal.takedown'
 import { Route as LegalPrivacyRouteImport } from './routes/legal.privacy'
+import { Route as LegalAcceptableUseRouteImport } from './routes/legal.acceptable-use'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated.profile'
 import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated.library'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated.home'
 import { Route as AuthenticatedCreateRouteImport } from './routes/_authenticated.create'
+import { Route as ApiPublicReportRouteImport } from './routes/api/public/report'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportRoute = ReportRouteImport.update({
+  id: '/report',
+  path: '/report',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -44,9 +59,19 @@ const LegalTermsRoute = LegalTermsRouteImport.update({
   path: '/legal/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LegalTakedownRoute = LegalTakedownRouteImport.update({
+  id: '/legal/takedown',
+  path: '/legal/takedown',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LegalPrivacyRoute = LegalPrivacyRouteImport.update({
   id: '/legal/privacy',
   path: '/legal/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalAcceptableUseRoute = LegalAcceptableUseRouteImport.update({
+  id: '/legal/acceptable-use',
+  path: '/legal/acceptable-use',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
@@ -69,86 +94,126 @@ const AuthenticatedCreateRoute = AuthenticatedCreateRouteImport.update({
   path: '/create',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const ApiPublicReportRoute = ApiPublicReportRouteImport.update({
+  id: '/api/public/report',
+  path: '/api/public/report',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/report': typeof ReportRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/create': typeof AuthenticatedCreateRoute
   '/home': typeof AuthenticatedHomeRoute
   '/library': typeof AuthenticatedLibraryRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/legal/acceptable-use': typeof LegalAcceptableUseRoute
   '/legal/privacy': typeof LegalPrivacyRoute
+  '/legal/takedown': typeof LegalTakedownRoute
   '/legal/terms': typeof LegalTermsRoute
+  '/api/public/report': typeof ApiPublicReportRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/report': typeof ReportRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/create': typeof AuthenticatedCreateRoute
   '/home': typeof AuthenticatedHomeRoute
   '/library': typeof AuthenticatedLibraryRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/legal/acceptable-use': typeof LegalAcceptableUseRoute
   '/legal/privacy': typeof LegalPrivacyRoute
+  '/legal/takedown': typeof LegalTakedownRoute
   '/legal/terms': typeof LegalTermsRoute
+  '/api/public/report': typeof ApiPublicReportRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteWithChildren
   '/login': typeof LoginRoute
+  '/report': typeof ReportRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/_authenticated/create': typeof AuthenticatedCreateRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/library': typeof AuthenticatedLibraryRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/legal/acceptable-use': typeof LegalAcceptableUseRoute
   '/legal/privacy': typeof LegalPrivacyRoute
+  '/legal/takedown': typeof LegalTakedownRoute
   '/legal/terms': typeof LegalTermsRoute
+  '/api/public/report': typeof ApiPublicReportRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/login'
+    | '/report'
+    | '/reset-password'
     | '/signup'
     | '/create'
     | '/home'
     | '/library'
     | '/profile'
+    | '/legal/acceptable-use'
     | '/legal/privacy'
+    | '/legal/takedown'
     | '/legal/terms'
+    | '/api/public/report'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
+    | '/report'
+    | '/reset-password'
     | '/signup'
     | '/create'
     | '/home'
     | '/library'
     | '/profile'
+    | '/legal/acceptable-use'
     | '/legal/privacy'
+    | '/legal/takedown'
     | '/legal/terms'
+    | '/api/public/report'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/login'
+    | '/report'
+    | '/reset-password'
     | '/signup'
     | '/_authenticated/create'
     | '/_authenticated/home'
     | '/_authenticated/library'
     | '/_authenticated/profile'
+    | '/legal/acceptable-use'
     | '/legal/privacy'
+    | '/legal/takedown'
     | '/legal/terms'
+    | '/api/public/report'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRoute: typeof AuthenticatedRouteWithChildren
   LoginRoute: typeof LoginRoute
+  ReportRoute: typeof ReportRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
+  LegalAcceptableUseRoute: typeof LegalAcceptableUseRoute
   LegalPrivacyRoute: typeof LegalPrivacyRoute
+  LegalTakedownRoute: typeof LegalTakedownRoute
   LegalTermsRoute: typeof LegalTermsRoute
+  ApiPublicReportRoute: typeof ApiPublicReportRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -158,6 +223,20 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/report': {
+      id: '/report'
+      path: '/report'
+      fullPath: '/report'
+      preLoaderRoute: typeof ReportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -188,11 +267,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LegalTermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/legal/takedown': {
+      id: '/legal/takedown'
+      path: '/legal/takedown'
+      fullPath: '/legal/takedown'
+      preLoaderRoute: typeof LegalTakedownRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/legal/privacy': {
       id: '/legal/privacy'
       path: '/legal/privacy'
       fullPath: '/legal/privacy'
       preLoaderRoute: typeof LegalPrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal/acceptable-use': {
+      id: '/legal/acceptable-use'
+      path: '/legal/acceptable-use'
+      fullPath: '/legal/acceptable-use'
+      preLoaderRoute: typeof LegalAcceptableUseRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/profile': {
@@ -223,6 +316,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCreateRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/api/public/report': {
+      id: '/api/public/report'
+      path: '/api/public/report'
+      fullPath: '/api/public/report'
+      preLoaderRoute: typeof ApiPublicReportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -248,9 +348,14 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRoute: AuthenticatedRouteWithChildren,
   LoginRoute: LoginRoute,
+  ReportRoute: ReportRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
+  LegalAcceptableUseRoute: LegalAcceptableUseRoute,
   LegalPrivacyRoute: LegalPrivacyRoute,
+  LegalTakedownRoute: LegalTakedownRoute,
   LegalTermsRoute: LegalTermsRoute,
+  ApiPublicReportRoute: ApiPublicReportRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

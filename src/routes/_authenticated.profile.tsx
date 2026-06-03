@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { LogOut, Shield } from "lucide-react";
+import { LogOut, Shield, FileWarning, BookOpen } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -52,6 +52,15 @@ function ProfilePage() {
         </Link>
         <Link to="/legal/privacy" className="flex items-center gap-2 rounded-xl border border-border bg-card p-3 text-sm">
           <Shield className="h-4 w-4 text-primary" /> Privacy Policy
+        </Link>
+        <Link to="/legal/acceptable-use" className="flex items-center gap-2 rounded-xl border border-border bg-card p-3 text-sm">
+          <BookOpen className="h-4 w-4 text-primary" /> Acceptable Use
+        </Link>
+        <Link to="/legal/takedown" className="flex items-center gap-2 rounded-xl border border-border bg-card p-3 text-sm">
+          <Shield className="h-4 w-4 text-primary" /> Content Takedown
+        </Link>
+        <Link to="/report" className="flex items-center gap-2 rounded-xl border border-border bg-card p-3 text-sm">
+          <FileWarning className="h-4 w-4 text-primary" /> Report abuse
         </Link>
       </section>
 
