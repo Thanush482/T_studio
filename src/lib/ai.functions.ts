@@ -240,3 +240,236 @@ export const editImage = createServerFn({ method: "POST" })
       imageUrl: storageUrl ?? imageUrlOut,
     };
   });
+// ─── Face Swap (Replicate) ──────────────────────────────────────────────────
+const FaceSwapSchema = z.object({
+  targetImage: z.string().min(20).max(15_000_000),
+  faceImage: z.string().min(20).max(15_000_000),
+  consent: z.literal(true, { errorMap: () => ({ message: "Consent is required." }) }),
+});
+
+export const faceSwap = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => FaceSwapSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    const { userId } = context;
+    await supabaseAdmin.from("consents").insert({
+      user_id: userId,
+      consent_type: "face_swap_subject_permission",
+      version: "v1",
+    });
+
+    const [target, face] = await Promise.all([
+      uploadDataUrl(userId, data.targetImage, "inputs"),
+      uploadDataUrl(userId, data.faceImage, "inputs"),
+    ]);
+
+    const output = await replicateRun("cdingram/face-swap", {
+      input_image: target.url,
+      swap_image: face.url,
+    });
+    const url = Array.isArray(output) ? (output[0] as string) : (output as string);
+    if (!url || typeof url !== "string") throw new Error("Face swap returned no image");
+
+    const stored = await downloadToStorage(url, userId, "png", "image/png");
+
+    const { data: row } = await supabaseAdmin
+      .from("generations")
+      .insert({
+        user_id: userId,
+        tool: "face_swap_image",
+        prompt: "face swap",
+        model: "cdingram/face-swap",
+        input_asset_paths: [target.path, face.path],
+        output_asset_path: stored.path,
+        status: "completed",
+      })
+      .select("id")
+      .single();
+
+    return { id: row?.id, imageUrl: stored.url };
+  });
+
+// ─── Text-to-Video (fal.ai) ─────────────────────────────────────────────────
+const VideoSchema = z.object({
+  prompt: z.string().min(3).max(2000),
+  duration: z.number().int().min(5).max(10).optional().default(5),
+});
+
+export const generateVideo = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => VideoSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    const { userId } = context;
+
+    // Moderate prompt
+    const apiKey = process.env.LOVABLE_API_KEY;
+    if (apiKey) {
+      const modRes = await fetch(`${GATEWAY}/chat/completions`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash-lite",
+          messages: [
+            { role: "system", content: MODERATION_SYSTEM },
+            { role: "user", content: data.prompt },
+          ],
+        }),
+      });
+      if (modRes.ok) {
+        const j = await modRes.json();
+        const v = (j.choices?.[0]?.message?.content ?? "").trim().toLowerCase();
+        await supabaseAdmin.from("moderation_logs").insert({
+          user_id: userId,
+          verdict: v.startsWith("block") ? "blocked" : "allowed",
+          prompt: data.prompt,
+          raw_response: { tool: "text_to_video", response: v },
+        });
+        if (v.startsWith("block")) throw new Error("This prompt violates our safety policy.");
+      }
+    }
+
+    const result = await falRun("fal-ai/wan/v2.2-5b/text-to-video", {
+      prompt: `${data.prompt}\n\n(Include a small "T_AI Studio" watermark in the bottom-right corner.)`,
+      num_frames: data.duration === 10 ? 161 : 81,
+    });
+    const videoUrl = (result.video as { url?: string } | undefined)?.url;
+    if (!videoUrl) throw new Error("Video generation returned no output");
+
+    const stored = await downloadToStorage(videoUrl, userId, "mp4", "video/mp4");
+
+    const { data: row } = await supabaseAdmin
+      .from("generations")
+      .insert({
+        user_id: userId,
+        tool: "text_to_video",
+        prompt: data.prompt,
+        model: "fal-ai/wan/v2.2-5b/text-to-video",
+        output_asset_path: stored.path,
+        status: "completed",
+      })
+      .select("id")
+      .single();
+
+    return { id: row?.id, videoUrl: stored.url };
+  });
+
+// ─── Body / Outfit Swap (fal.ai IDM-VTON) ───────────────────────────────────
+const BodySwapSchema = z.object({
+  personImage: z.string().min(20).max(15_000_000),
+  garmentImage: z.string().min(20).max(15_000_000),
+  description: z.string().min(2).max(200),
+  consent: z.literal(true, { errorMap: () => ({ message: "Consent is required." }) }),
+});
+
+export const bodySwap = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => BodySwapSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    const { userId } = context;
+    await supabaseAdmin.from("consents").insert({
+      user_id: userId,
+      consent_type: "face_swap_subject_permission",
+      version: "v1",
+    });
+
+    const [person, garment] = await Promise.all([
+      uploadDataUrl(userId, data.personImage, "inputs"),
+      uploadDataUrl(userId, data.garmentImage, "inputs"),
+    ]);
+
+    const result = await falRun("fal-ai/idm-vton", {
+      human_image_url: person.url,
+      garment_image_url: garment.url,
+      description: data.description,
+    });
+    const out = (result.image as { url?: string } | undefined)?.url;
+    if (!out) throw new Error("Body swap returned no image");
+
+    const stored = await downloadToStorage(out, userId, "png", "image/png");
+
+    const { data: row } = await supabaseAdmin
+      .from("generations")
+      .insert({
+        user_id: userId,
+        tool: "body_swap",
+        prompt: data.description,
+        model: "fal-ai/idm-vton",
+        input_asset_paths: [person.path, garment.path],
+        output_asset_path: stored.path,
+        status: "completed",
+      })
+      .select("id")
+      .single();
+
+    return { id: row?.id, imageUrl: stored.url };
+  });
+
+// ─── Model Training (Replicate LoRA) ────────────────────────────────────────
+const TrainSchema = z.object({
+  triggerWord: z.string().min(2).max(40).regex(/^[A-Za-z0-9_]+$/),
+  zipDataUrl: z.string().min(50).max(60_000_000), // ~45MB cap
+  consent: z.literal(true, { errorMap: () => ({ message: "Ownership consent is required." }) }),
+});
+
+export const trainModel = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => TrainSchema.parse(d))
+  .handler(async ({ data, context }) => {
+    const { userId } = context;
+    await supabaseAdmin.from("consents").insert({
+      user_id: userId,
+      consent_type: "training_ownership",
+      version: "v1",
+    });
+
+    // Upload the zip to storage and get a signed URL
+    const match = /^data:(application\/zip|application\/x-zip-compressed);base64,(.*)$/.exec(data.zipDataUrl);
+    if (!match) throw new Error("Please upload a .zip file of training images.");
+    const bytes = Uint8Array.from(atob(match[2]), (c) => c.charCodeAt(0));
+    const path = `${userId}/training/${crypto.randomUUID()}.zip`;
+    const { error: upErr } = await supabaseAdmin.storage
+      .from("generations")
+      .upload(path, bytes, { contentType: "application/zip" });
+    if (upErr) throw upErr;
+    const { data: signed } = await supabaseAdmin.storage
+      .from("generations")
+      .createSignedUrl(path, 60 * 60 * 6);
+    const zipUrl = signed?.signedUrl;
+    if (!zipUrl) throw new Error("Could not prepare training data");
+
+    // Kick off Replicate training (long-running, do NOT wait)
+    const token = process.env.REPLICATE_API_TOKEN;
+    if (!token) throw new Error("Replicate not configured");
+    const res = await fetch(
+      `https://api.replicate.com/v1/models/ostris/flux-dev-lora-trainer/versions/e440909d3512c31646ee2e0c7d6f6f4923224863a6a10c494606e79fb5844497/trainings`,
+      {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          destination: `${process.env.REPLICATE_USERNAME ?? "lovable"}/tai-${userId.slice(0, 8)}-${Date.now()}`,
+          input: {
+            input_images: zipUrl,
+            trigger_word: data.triggerWord,
+            steps: 1000,
+          },
+        }),
+      },
+    );
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Training failed to start (${res.status}). Tip: set REPLICATE_USERNAME secret to your Replicate account name. ${text.slice(0, 200)}`);
+    }
+    const job = (await res.json()) as { id: string; status: string };
+
+    await supabaseAdmin.from("generations").insert({
+      user_id: userId,
+      tool: "model_training",
+      prompt: data.triggerWord,
+      model: "ostris/flux-dev-lora-trainer",
+      input_asset_paths: [path],
+      status: "processing",
+      moderation_result: { training_id: job.id },
+    });
+
+    return { trainingId: job.id, status: job.status };
+  });
