@@ -19,10 +19,14 @@ import { Route as LegalTermsRouteImport } from './routes/legal.terms'
 import { Route as LegalTakedownRouteImport } from './routes/legal.takedown'
 import { Route as LegalPrivacyRouteImport } from './routes/legal.privacy'
 import { Route as LegalAcceptableUseRouteImport } from './routes/legal.acceptable-use'
+import { Route as AuthenticatedVideoRouteImport } from './routes/_authenticated.video'
+import { Route as AuthenticatedTrainRouteImport } from './routes/_authenticated.train'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated.profile'
 import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated.library'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated.home'
+import { Route as AuthenticatedFaceswapRouteImport } from './routes/_authenticated.faceswap'
 import { Route as AuthenticatedCreateRouteImport } from './routes/_authenticated.create'
+import { Route as AuthenticatedBodyswapRouteImport } from './routes/_authenticated.bodyswap'
 import { Route as ApiPublicReportRouteImport } from './routes/api/public/report'
 
 const SignupRoute = SignupRouteImport.update({
@@ -74,6 +78,16 @@ const LegalAcceptableUseRoute = LegalAcceptableUseRouteImport.update({
   path: '/legal/acceptable-use',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedVideoRoute = AuthenticatedVideoRouteImport.update({
+  id: '/video',
+  path: '/video',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedTrainRoute = AuthenticatedTrainRouteImport.update({
+  id: '/train',
+  path: '/train',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -89,9 +103,19 @@ const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
   path: '/home',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedFaceswapRoute = AuthenticatedFaceswapRouteImport.update({
+  id: '/faceswap',
+  path: '/faceswap',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedCreateRoute = AuthenticatedCreateRouteImport.update({
   id: '/create',
   path: '/create',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
+const AuthenticatedBodyswapRoute = AuthenticatedBodyswapRouteImport.update({
+  id: '/bodyswap',
+  path: '/bodyswap',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
 const ApiPublicReportRoute = ApiPublicReportRouteImport.update({
@@ -106,10 +130,14 @@ export interface FileRoutesByFullPath {
   '/report': typeof ReportRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/bodyswap': typeof AuthenticatedBodyswapRoute
   '/create': typeof AuthenticatedCreateRoute
+  '/faceswap': typeof AuthenticatedFaceswapRoute
   '/home': typeof AuthenticatedHomeRoute
   '/library': typeof AuthenticatedLibraryRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/train': typeof AuthenticatedTrainRoute
+  '/video': typeof AuthenticatedVideoRoute
   '/legal/acceptable-use': typeof LegalAcceptableUseRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/takedown': typeof LegalTakedownRoute
@@ -122,10 +150,14 @@ export interface FileRoutesByTo {
   '/report': typeof ReportRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/bodyswap': typeof AuthenticatedBodyswapRoute
   '/create': typeof AuthenticatedCreateRoute
+  '/faceswap': typeof AuthenticatedFaceswapRoute
   '/home': typeof AuthenticatedHomeRoute
   '/library': typeof AuthenticatedLibraryRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/train': typeof AuthenticatedTrainRoute
+  '/video': typeof AuthenticatedVideoRoute
   '/legal/acceptable-use': typeof LegalAcceptableUseRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/takedown': typeof LegalTakedownRoute
@@ -140,10 +172,14 @@ export interface FileRoutesById {
   '/report': typeof ReportRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/_authenticated/bodyswap': typeof AuthenticatedBodyswapRoute
   '/_authenticated/create': typeof AuthenticatedCreateRoute
+  '/_authenticated/faceswap': typeof AuthenticatedFaceswapRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/library': typeof AuthenticatedLibraryRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_authenticated/train': typeof AuthenticatedTrainRoute
+  '/_authenticated/video': typeof AuthenticatedVideoRoute
   '/legal/acceptable-use': typeof LegalAcceptableUseRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/takedown': typeof LegalTakedownRoute
@@ -158,10 +194,14 @@ export interface FileRouteTypes {
     | '/report'
     | '/reset-password'
     | '/signup'
+    | '/bodyswap'
     | '/create'
+    | '/faceswap'
     | '/home'
     | '/library'
     | '/profile'
+    | '/train'
+    | '/video'
     | '/legal/acceptable-use'
     | '/legal/privacy'
     | '/legal/takedown'
@@ -174,10 +214,14 @@ export interface FileRouteTypes {
     | '/report'
     | '/reset-password'
     | '/signup'
+    | '/bodyswap'
     | '/create'
+    | '/faceswap'
     | '/home'
     | '/library'
     | '/profile'
+    | '/train'
+    | '/video'
     | '/legal/acceptable-use'
     | '/legal/privacy'
     | '/legal/takedown'
@@ -191,10 +235,14 @@ export interface FileRouteTypes {
     | '/report'
     | '/reset-password'
     | '/signup'
+    | '/_authenticated/bodyswap'
     | '/_authenticated/create'
+    | '/_authenticated/faceswap'
     | '/_authenticated/home'
     | '/_authenticated/library'
     | '/_authenticated/profile'
+    | '/_authenticated/train'
+    | '/_authenticated/video'
     | '/legal/acceptable-use'
     | '/legal/privacy'
     | '/legal/takedown'
@@ -288,6 +336,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LegalAcceptableUseRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/video': {
+      id: '/_authenticated/video'
+      path: '/video'
+      fullPath: '/video'
+      preLoaderRoute: typeof AuthenticatedVideoRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/train': {
+      id: '/_authenticated/train'
+      path: '/train'
+      fullPath: '/train'
+      preLoaderRoute: typeof AuthenticatedTrainRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/profile': {
       id: '/_authenticated/profile'
       path: '/profile'
@@ -309,11 +371,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedHomeRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/faceswap': {
+      id: '/_authenticated/faceswap'
+      path: '/faceswap'
+      fullPath: '/faceswap'
+      preLoaderRoute: typeof AuthenticatedFaceswapRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/create': {
       id: '/_authenticated/create'
       path: '/create'
       fullPath: '/create'
       preLoaderRoute: typeof AuthenticatedCreateRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/bodyswap': {
+      id: '/_authenticated/bodyswap'
+      path: '/bodyswap'
+      fullPath: '/bodyswap'
+      preLoaderRoute: typeof AuthenticatedBodyswapRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/api/public/report': {
@@ -327,17 +403,25 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedBodyswapRoute: typeof AuthenticatedBodyswapRoute
   AuthenticatedCreateRoute: typeof AuthenticatedCreateRoute
+  AuthenticatedFaceswapRoute: typeof AuthenticatedFaceswapRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
+  AuthenticatedTrainRoute: typeof AuthenticatedTrainRoute
+  AuthenticatedVideoRoute: typeof AuthenticatedVideoRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedBodyswapRoute: AuthenticatedBodyswapRoute,
   AuthenticatedCreateRoute: AuthenticatedCreateRoute,
+  AuthenticatedFaceswapRoute: AuthenticatedFaceswapRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedLibraryRoute: AuthenticatedLibraryRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
+  AuthenticatedTrainRoute: AuthenticatedTrainRoute,
+  AuthenticatedVideoRoute: AuthenticatedVideoRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
@@ -360,13 +444,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

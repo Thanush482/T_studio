@@ -374,7 +374,15 @@ export type Database = {
         | "completed"
         | "failed"
         | "blocked"
-      generation_tool: "text_to_image" | "image_edit" | "face_swap_image"
+      generation_tool:
+        | "text_to_image"
+        | "image_edit"
+        | "face_swap_image"
+        | "face_swap_video"
+        | "body_swap"
+        | "text_to_video"
+        | "video_edit"
+        | "model_training"
       subscription_tier: "free" | "pro" | "premium"
       verification_level: "none" | "email" | "phone" | "id"
     }
@@ -529,7 +537,16 @@ export const Constants = {
         "failed",
         "blocked",
       ],
-      generation_tool: ["text_to_image", "image_edit", "face_swap_image"],
+      generation_tool: [
+        "text_to_image",
+        "image_edit",
+        "face_swap_image",
+        "face_swap_video",
+        "body_swap",
+        "text_to_video",
+        "video_edit",
+        "model_training",
+      ],
       subscription_tier: ["free", "pro", "premium"],
       verification_level: ["none", "email", "phone", "id"],
     },
