@@ -328,9 +328,10 @@ export const generateVideo = createServerFn({ method: "POST" })
       }
     }
 
-    const result = await falRun("fal-ai/wan/v2.2-5b/text-to-video", {
+    const result = await falRun("fal-ai/kling-video/v1/standard/text-to-video", {
       prompt: `${data.prompt}\n\n(Include a small "T_AI Studio" watermark in the bottom-right corner.)`,
-      num_frames: data.duration === 10 ? 161 : 81,
+      duration: String(data.duration),
+      aspect_ratio: "16:9",
     });
     const videoUrl = (result.video as { url?: string } | undefined)?.url;
     if (!videoUrl) throw new Error("Video generation returned no output");
@@ -343,7 +344,7 @@ export const generateVideo = createServerFn({ method: "POST" })
         user_id: userId,
         tool: "text_to_video",
         prompt: data.prompt,
-        model: "fal-ai/wan/v2.2-5b/text-to-video",
+        model: "fal-ai/kling-video/v1/standard/text-to-video",
         output_asset_path: stored.path,
         status: "completed",
       })
