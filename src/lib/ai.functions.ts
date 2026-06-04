@@ -244,7 +244,7 @@ export const editImage = createServerFn({ method: "POST" })
 const FaceSwapSchema = z.object({
   targetImage: z.string().min(20).max(15_000_000),
   faceImage: z.string().min(20).max(15_000_000),
-  consent: z.literal(true, { errorMap: () => ({ message: "Consent is required." }) }),
+  consent: z.literal(true),
 });
 
 export const faceSwap = createServerFn({ method: "POST" })
@@ -358,7 +358,7 @@ const BodySwapSchema = z.object({
   personImage: z.string().min(20).max(15_000_000),
   garmentImage: z.string().min(20).max(15_000_000),
   description: z.string().min(2).max(200),
-  consent: z.literal(true, { errorMap: () => ({ message: "Consent is required." }) }),
+  consent: z.literal(true),
 });
 
 export const bodySwap = createServerFn({ method: "POST" })
@@ -408,7 +408,7 @@ export const bodySwap = createServerFn({ method: "POST" })
 const TrainSchema = z.object({
   triggerWord: z.string().min(2).max(40).regex(/^[A-Za-z0-9_]+$/),
   zipDataUrl: z.string().min(50).max(60_000_000), // ~45MB cap
-  consent: z.literal(true, { errorMap: () => ({ message: "Ownership consent is required." }) }),
+  consent: z.literal(true),
 });
 
 export const trainModel = createServerFn({ method: "POST" })
