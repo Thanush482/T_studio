@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { downloadToStorage, falRun, replicateRun, uploadDataUrl } from "./providers.server";
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1";
 
