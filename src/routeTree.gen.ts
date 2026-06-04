@@ -22,6 +22,7 @@ import { Route as LegalAcceptableUseRouteImport } from './routes/legal.acceptabl
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated.profile'
 import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated.library'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated.home'
+import { Route as AuthenticatedFaceswapRouteImport } from './routes/_authenticated.faceswap'
 import { Route as AuthenticatedCreateRouteImport } from './routes/_authenticated.create'
 import { Route as ApiPublicReportRouteImport } from './routes/api/public/report'
 
@@ -89,6 +90,11 @@ const AuthenticatedHomeRoute = AuthenticatedHomeRouteImport.update({
   path: '/home',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedFaceswapRoute = AuthenticatedFaceswapRouteImport.update({
+  id: '/faceswap',
+  path: '/faceswap',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedCreateRoute = AuthenticatedCreateRouteImport.update({
   id: '/create',
   path: '/create',
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/create': typeof AuthenticatedCreateRoute
+  '/faceswap': typeof AuthenticatedFaceswapRoute
   '/home': typeof AuthenticatedHomeRoute
   '/library': typeof AuthenticatedLibraryRoute
   '/profile': typeof AuthenticatedProfileRoute
@@ -123,6 +130,7 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/create': typeof AuthenticatedCreateRoute
+  '/faceswap': typeof AuthenticatedFaceswapRoute
   '/home': typeof AuthenticatedHomeRoute
   '/library': typeof AuthenticatedLibraryRoute
   '/profile': typeof AuthenticatedProfileRoute
@@ -141,6 +149,7 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
   '/_authenticated/create': typeof AuthenticatedCreateRoute
+  '/_authenticated/faceswap': typeof AuthenticatedFaceswapRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/library': typeof AuthenticatedLibraryRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
@@ -159,6 +168,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/create'
+    | '/faceswap'
     | '/home'
     | '/library'
     | '/profile'
@@ -175,6 +185,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/create'
+    | '/faceswap'
     | '/home'
     | '/library'
     | '/profile'
@@ -192,6 +203,7 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/signup'
     | '/_authenticated/create'
+    | '/_authenticated/faceswap'
     | '/_authenticated/home'
     | '/_authenticated/library'
     | '/_authenticated/profile'
@@ -309,6 +321,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedHomeRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/faceswap': {
+      id: '/_authenticated/faceswap'
+      path: '/faceswap'
+      fullPath: '/faceswap'
+      preLoaderRoute: typeof AuthenticatedFaceswapRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/create': {
       id: '/_authenticated/create'
       path: '/create'
@@ -328,6 +347,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteChildren {
   AuthenticatedCreateRoute: typeof AuthenticatedCreateRoute
+  AuthenticatedFaceswapRoute: typeof AuthenticatedFaceswapRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
@@ -335,6 +355,7 @@ interface AuthenticatedRouteChildren {
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedCreateRoute: AuthenticatedCreateRoute,
+  AuthenticatedFaceswapRoute: AuthenticatedFaceswapRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedLibraryRoute: AuthenticatedLibraryRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
@@ -360,3 +381,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
