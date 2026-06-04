@@ -25,6 +25,7 @@ import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated.home'
 import { Route as AuthenticatedFaceswapRouteImport } from './routes/_authenticated.faceswap'
 import { Route as AuthenticatedCreateRouteImport } from './routes/_authenticated.create'
+import { Route as AuthenticatedBodyswapRouteImport } from './routes/_authenticated.bodyswap'
 import { Route as ApiPublicReportRouteImport } from './routes/api/public/report'
 
 const SignupRoute = SignupRouteImport.update({
@@ -106,6 +107,11 @@ const AuthenticatedCreateRoute = AuthenticatedCreateRouteImport.update({
   path: '/create',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedBodyswapRoute = AuthenticatedBodyswapRouteImport.update({
+  id: '/bodyswap',
+  path: '/bodyswap',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const ApiPublicReportRoute = ApiPublicReportRouteImport.update({
   id: '/api/public/report',
   path: '/api/public/report',
@@ -118,6 +124,7 @@ export interface FileRoutesByFullPath {
   '/report': typeof ReportRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/bodyswap': typeof AuthenticatedBodyswapRoute
   '/create': typeof AuthenticatedCreateRoute
   '/faceswap': typeof AuthenticatedFaceswapRoute
   '/home': typeof AuthenticatedHomeRoute
@@ -136,6 +143,7 @@ export interface FileRoutesByTo {
   '/report': typeof ReportRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/bodyswap': typeof AuthenticatedBodyswapRoute
   '/create': typeof AuthenticatedCreateRoute
   '/faceswap': typeof AuthenticatedFaceswapRoute
   '/home': typeof AuthenticatedHomeRoute
@@ -156,6 +164,7 @@ export interface FileRoutesById {
   '/report': typeof ReportRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signup': typeof SignupRoute
+  '/_authenticated/bodyswap': typeof AuthenticatedBodyswapRoute
   '/_authenticated/create': typeof AuthenticatedCreateRoute
   '/_authenticated/faceswap': typeof AuthenticatedFaceswapRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
@@ -176,6 +185,7 @@ export interface FileRouteTypes {
     | '/report'
     | '/reset-password'
     | '/signup'
+    | '/bodyswap'
     | '/create'
     | '/faceswap'
     | '/home'
@@ -194,6 +204,7 @@ export interface FileRouteTypes {
     | '/report'
     | '/reset-password'
     | '/signup'
+    | '/bodyswap'
     | '/create'
     | '/faceswap'
     | '/home'
@@ -213,6 +224,7 @@ export interface FileRouteTypes {
     | '/report'
     | '/reset-password'
     | '/signup'
+    | '/_authenticated/bodyswap'
     | '/_authenticated/create'
     | '/_authenticated/faceswap'
     | '/_authenticated/home'
@@ -354,6 +366,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedCreateRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/bodyswap': {
+      id: '/_authenticated/bodyswap'
+      path: '/bodyswap'
+      fullPath: '/bodyswap'
+      preLoaderRoute: typeof AuthenticatedBodyswapRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/api/public/report': {
       id: '/api/public/report'
       path: '/api/public/report'
@@ -365,6 +384,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteChildren {
+  AuthenticatedBodyswapRoute: typeof AuthenticatedBodyswapRoute
   AuthenticatedCreateRoute: typeof AuthenticatedCreateRoute
   AuthenticatedFaceswapRoute: typeof AuthenticatedFaceswapRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
@@ -374,6 +394,7 @@ interface AuthenticatedRouteChildren {
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
+  AuthenticatedBodyswapRoute: AuthenticatedBodyswapRoute,
   AuthenticatedCreateRoute: AuthenticatedCreateRoute,
   AuthenticatedFaceswapRoute: AuthenticatedFaceswapRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
