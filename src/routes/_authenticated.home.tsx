@@ -37,10 +37,10 @@ function HomePage() {
         <div className="grid grid-cols-2 gap-3">
           <Tile to="/create" icon={<Sparkles className="h-6 w-6" />} title="Text to Image" desc="Describe an image" />
           <Tile to="/create" icon={<Wand2 className="h-6 w-6" />} title="Edit with prompt" desc="Transform a photo" />
-          <Tile to="/faceswap" icon={<Users className="h-6 w-6" />} title="Face Swap" desc="Swap faces in photos" />
-          <Tile to="/bodyswap" icon={<Shirt className="h-6 w-6" />} title="Outfit Swap" desc="Try-on a garment" />
-          <Tile to="/video" icon={<Film className="h-6 w-6" />} title="AI Video" desc="Text to short video" />
-          <Tile to="/train" icon={<Brain className="h-6 w-6" />} title="Train model" desc="Your own AI subject" />
+          <Tile comingSoon icon={<Users className="h-6 w-6" />} title="Face Swap" desc="Swap faces in photos" />
+          <Tile comingSoon icon={<Shirt className="h-6 w-6" />} title="Outfit Swap" desc="Try-on a garment" />
+          <Tile comingSoon icon={<Film className="h-6 w-6" />} title="AI Video" desc="Text to short video" />
+          <Tile comingSoon icon={<Brain className="h-6 w-6" />} title="Train model" desc="Your own AI subject" />
           <Tile to="/library" icon={<ImageIcon className="h-6 w-6" />} title="Your library" desc="All your creations" />
           <Tile to="/profile" icon={<Sparkles className="h-6 w-6" />} title="Profile" desc="Account & legal" />
         </div>
@@ -49,12 +49,43 @@ function HomePage() {
   );
 }
 
-function Tile({ to, icon, title, desc }: { to: string; icon: React.ReactNode; title: string; desc: string }) {
-  return (
-    <Link to={to} className="group rounded-2xl border border-border bg-card p-4 transition-all hover:border-primary/50 hover:bg-card/80">
+function Tile({
+  to,
+  icon,
+  title,
+  desc,
+  comingSoon,
+}: {
+  to?: string;
+  icon: React.ReactNode;
+  title: string;
+  desc: string;
+  comingSoon?: boolean;
+}) {
+  const body = (
+    <>
       <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 text-primary">{icon}</div>
       <p className="font-display text-sm font-semibold">{title}</p>
       <p className="text-xs text-muted-foreground">{desc}</p>
+      {comingSoon && (
+        <span className="mt-2 inline-block rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+          Coming soon
+        </span>
+      )}
+    </>
+  );
+
+  if (comingSoon) {
+    return (
+      <div className="group rounded-2xl border border-border bg-card p-4 opacity-60">
+        {body}
+      </div>
+    );
+  }
+
+  return (
+    <Link to={to!} className="group rounded-2xl border border-border bg-card p-4 transition-all hover:border-primary/50 hover:bg-card/80">
+      {body}
     </Link>
   );
 }
