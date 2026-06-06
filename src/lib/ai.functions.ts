@@ -55,7 +55,7 @@ export const generateImage = createServerFn({ method: "POST" })
     }
     const modJson = await modRes.json();
     const verdict = (modJson.choices?.[0]?.message?.content ?? "").trim().toLowerCase();
-    const blocked = verdict.startsWith("block");
+    const blocked = verdict === "block";
 
     await supabaseAdmin.from("moderation_logs").insert({
       user_id: userId,
@@ -156,7 +156,7 @@ export const editImage = createServerFn({ method: "POST" })
     }
     const modJson = await modRes.json();
     const verdict = (modJson.choices?.[0]?.message?.content ?? "").trim().toLowerCase();
-    const blocked = verdict.startsWith("block");
+    const blocked = verdict === "block";
 
     await supabaseAdmin.from("moderation_logs").insert({
       user_id: userId,
