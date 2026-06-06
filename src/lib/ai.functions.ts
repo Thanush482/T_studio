@@ -28,6 +28,18 @@ const EditSchema = z.object({
   imageDataUrl: z.string().min(20).max(15_000_000), // base64 data URL, ~10MB cap
 });
 
+function getImageProviderFinishReason(response: unknown) {
+  const payload = response as {
+    choices?: Array<{ finish_reason?: string | null; native_finish_reason?: string | null }>;
+  };
+  const choice = payload.choices?.[0];
+  return (choice?.native_finish_reason ?? choice?.finish_reason ?? "").toUpperCase();
+}
+
+function isImagePolicyFinish(reason: string) {
+  return reason.includes("PROHIBITED") || reason.includes("SAFETY") || reason.includes("CONTENT_FILTER");
+}
+
 export const generateImage = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => InputSchema.parse(d))
@@ -208,8 +220,20 @@ export const editImage = createServerFn({ method: "POST" })
       }
     }
     if (!imageUrlOut) {
+      const finishReason = getImageProviderFinishReason(editJson);
       console.error("editImage: no image in response", JSON.stringify(editJson).slice(0, 2000));
-      throw new Error("The model didn't return an image. Try a simpler prompt or a different photo.");
+      if (isImagePolicyFinish(finishReason)) {
+        return {
+          id: null,
+          imageUrl: null,
+          error: "This edit was blocked by the image safety system. Try a non-sensitive photo or a safer edit.",
+        };
+      }
+      return {
+        id: null,
+        imageUrl: null,
+        error: "The model didn't return an image. Try a simpler prompt or a different photo.",
+      };
     }
 
     // Upload to storage if it's a data URL
