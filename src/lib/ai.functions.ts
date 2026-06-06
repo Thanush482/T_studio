@@ -174,7 +174,7 @@ export const editImage = createServerFn({ method: "POST" })
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-image",
+        model: "google/gemini-3.1-flash-image-preview",
         modalities: ["image", "text"],
         messages: [
           {
@@ -194,12 +194,23 @@ export const editImage = createServerFn({ method: "POST" })
     }
     const editJson = await editRes.json();
     const message = editJson.choices?.[0]?.message;
-    const imageUrlOut: string | undefined =
+    // Response shape varies: try multiple locations
+    let imageUrlOut: string | undefined =
       message?.images?.[0]?.image_url?.url ??
       message?.images?.[0]?.url ??
       undefined;
-
-    if (!imageUrlOut) throw new Error("The model didn't return an image. Try a different prompt.");
+    if (!imageUrlOut && Array.isArray(message?.content)) {
+      for (const part of message.content) {
+        if (part?.type === "image_url" && part?.image_url?.url) { imageUrlOut = part.image_url.url; break; }
+        if (part?.type === "output_image" && part?.image_url?.url) { imageUrlOut = part.image_url.url; break; }
+        if (part?.image_url?.url) { imageUrlOut = part.image_url.url; break; }
+        if (typeof part?.b64_json === "string") { imageUrlOut = `data:image/png;base64,${part.b64_json}`; break; }
+      }
+    }
+    if (!imageUrlOut) {
+      console.error("editImage: no image in response", JSON.stringify(editJson).slice(0, 2000));
+      throw new Error("The model didn't return an image. Try a simpler prompt or a different photo.");
+    }
 
     // Upload to storage if it's a data URL
     let storageUrl: string | null = null;
