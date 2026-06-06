@@ -86,18 +86,27 @@ export const generateImage = createServerFn({ method: "POST" })
       method: "POST",
       headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-image",
+        model: "openai/gpt-image-2",
         prompt: watermarkedPrompt,
+        quality: "low",
+        size: "1024x1024",
+        n: 1,
       }),
     });
     if (!genRes.ok) {
       if (genRes.status === 429) throw new Error("Too many requests — please slow down.");
       if (genRes.status === 402) throw new Error("AI credits exhausted. Try again later.");
+      const errText = await genRes.text().catch(() => "");
+      console.error("generateImage failed", genRes.status, errText);
       throw new Error(`Image generation failed (${genRes.status})`);
     }
     const genJson = await genRes.json();
     const b64 = genJson.data?.[0]?.b64_json as string | undefined;
     const url = genJson.data?.[0]?.url as string | undefined;
+    if (!b64 && !url) {
+      console.error("generateImage: no image in response", JSON.stringify(genJson).slice(0, 2000));
+      throw new Error("The model didn't return an image. Try a different prompt.");
+    }
 
     let storageUrl: string | null = null;
     const fileName = `${userId}/${crypto.randomUUID()}.png`;
