@@ -39,6 +39,10 @@ function CreatePage() {
       return runGen({ data: { prompt: p } });
     },
     onSuccess: (res) => {
+      if (res && "error" in res && res.error) {
+        toast.error(res.error);
+        return;
+      }
       if (res?.imageUrl) setImage(res.imageUrl);
       queryClient.invalidateQueries({ queryKey: ["library"] });
     },
