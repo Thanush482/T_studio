@@ -25,6 +25,7 @@ import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedLibraryRouteImport } from './routes/_authenticated.library'
 import { Route as AuthenticatedHomeRouteImport } from './routes/_authenticated.home'
 import { Route as AuthenticatedFaceswapRouteImport } from './routes/_authenticated.faceswap'
+import { Route as AuthenticatedEditRouteImport } from './routes/_authenticated.edit'
 import { Route as AuthenticatedCreateRouteImport } from './routes/_authenticated.create'
 import { Route as AuthenticatedBodyswapRouteImport } from './routes/_authenticated.bodyswap'
 import { Route as ApiPublicReportRouteImport } from './routes/api/public/report'
@@ -108,6 +109,11 @@ const AuthenticatedFaceswapRoute = AuthenticatedFaceswapRouteImport.update({
   path: '/faceswap',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedEditRoute = AuthenticatedEditRouteImport.update({
+  id: '/edit',
+  path: '/edit',
+  getParentRoute: () => AuthenticatedRoute,
+} as any)
 const AuthenticatedCreateRoute = AuthenticatedCreateRouteImport.update({
   id: '/create',
   path: '/create',
@@ -132,6 +138,7 @@ export interface FileRoutesByFullPath {
   '/signup': typeof SignupRoute
   '/bodyswap': typeof AuthenticatedBodyswapRoute
   '/create': typeof AuthenticatedCreateRoute
+  '/edit': typeof AuthenticatedEditRoute
   '/faceswap': typeof AuthenticatedFaceswapRoute
   '/home': typeof AuthenticatedHomeRoute
   '/library': typeof AuthenticatedLibraryRoute
@@ -152,6 +159,7 @@ export interface FileRoutesByTo {
   '/signup': typeof SignupRoute
   '/bodyswap': typeof AuthenticatedBodyswapRoute
   '/create': typeof AuthenticatedCreateRoute
+  '/edit': typeof AuthenticatedEditRoute
   '/faceswap': typeof AuthenticatedFaceswapRoute
   '/home': typeof AuthenticatedHomeRoute
   '/library': typeof AuthenticatedLibraryRoute
@@ -174,6 +182,7 @@ export interface FileRoutesById {
   '/signup': typeof SignupRoute
   '/_authenticated/bodyswap': typeof AuthenticatedBodyswapRoute
   '/_authenticated/create': typeof AuthenticatedCreateRoute
+  '/_authenticated/edit': typeof AuthenticatedEditRoute
   '/_authenticated/faceswap': typeof AuthenticatedFaceswapRoute
   '/_authenticated/home': typeof AuthenticatedHomeRoute
   '/_authenticated/library': typeof AuthenticatedLibraryRoute
@@ -196,6 +205,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/bodyswap'
     | '/create'
+    | '/edit'
     | '/faceswap'
     | '/home'
     | '/library'
@@ -216,6 +226,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/bodyswap'
     | '/create'
+    | '/edit'
     | '/faceswap'
     | '/home'
     | '/library'
@@ -237,6 +248,7 @@ export interface FileRouteTypes {
     | '/signup'
     | '/_authenticated/bodyswap'
     | '/_authenticated/create'
+    | '/_authenticated/edit'
     | '/_authenticated/faceswap'
     | '/_authenticated/home'
     | '/_authenticated/library'
@@ -378,6 +390,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFaceswapRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/edit': {
+      id: '/_authenticated/edit'
+      path: '/edit'
+      fullPath: '/edit'
+      preLoaderRoute: typeof AuthenticatedEditRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/create': {
       id: '/_authenticated/create'
       path: '/create'
@@ -405,6 +424,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteChildren {
   AuthenticatedBodyswapRoute: typeof AuthenticatedBodyswapRoute
   AuthenticatedCreateRoute: typeof AuthenticatedCreateRoute
+  AuthenticatedEditRoute: typeof AuthenticatedEditRoute
   AuthenticatedFaceswapRoute: typeof AuthenticatedFaceswapRoute
   AuthenticatedHomeRoute: typeof AuthenticatedHomeRoute
   AuthenticatedLibraryRoute: typeof AuthenticatedLibraryRoute
@@ -416,6 +436,7 @@ interface AuthenticatedRouteChildren {
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedBodyswapRoute: AuthenticatedBodyswapRoute,
   AuthenticatedCreateRoute: AuthenticatedCreateRoute,
+  AuthenticatedEditRoute: AuthenticatedEditRoute,
   AuthenticatedFaceswapRoute: AuthenticatedFaceswapRoute,
   AuthenticatedHomeRoute: AuthenticatedHomeRoute,
   AuthenticatedLibraryRoute: AuthenticatedLibraryRoute,
