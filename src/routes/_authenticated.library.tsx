@@ -38,16 +38,23 @@ function LibraryPage() {
     <div className="space-y-4">
       <h1 className="font-display text-2xl font-bold">Library</h1>
       {isLoading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <div className="grid grid-cols-2 gap-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="overflow-hidden rounded-xl border border-border bg-card">
+              <div className="aspect-square animate-shimmer" />
+              <div className="mx-2 my-2 h-3 w-3/4 rounded bg-muted animate-shimmer" />
+            </div>
+          ))}
+        </div>
       ) : !data?.length ? (
-        <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center">
+        <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-border bg-card/50 p-10 text-center animate-fade-in">
           <ImageIcon className="h-8 w-8 text-muted-foreground" />
           <p className="text-sm text-muted-foreground">No creations yet. Head to Create to make your first one.</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-3">
-          {data.map((g) => (
-            <div key={g.id} className="overflow-hidden rounded-xl border border-border bg-card">
+          {data.map((g, i) => (
+            <div key={g.id} className="overflow-hidden rounded-xl border border-border bg-card transition-all duration-300 hover:border-primary/30 hover:shadow-[0_0_16px_-4px_oklch(0.62_0.24_295/0.15)]" style={{ animation: `fade-in 0.4s ease-out ${i * 80}ms both` }}>
               <div className="aspect-square bg-muted">
                 {g.signedUrl ? (
                   <div className="relative h-full w-full">
