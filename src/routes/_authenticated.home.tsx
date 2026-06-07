@@ -70,22 +70,20 @@ function HomePage() {
   );
 }
 
-function Tile({
-  to,
+function TileBody({
   icon,
   title,
   desc,
   comingSoon,
 }: {
-  to?: string;
   icon: React.ReactNode;
   title: string;
   desc: string;
   comingSoon?: boolean;
 }) {
-  const body = (
+  return (
     <>
-      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 text-primary">{icon}</div>
+      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15 text-primary transition-transform duration-300 group-hover:scale-110">{icon}</div>
       <p className="font-display text-sm font-semibold">{title}</p>
       <p className="text-xs text-muted-foreground">{desc}</p>
       {comingSoon && (
@@ -94,19 +92,5 @@ function Tile({
         </span>
       )}
     </>
-  );
-
-  if (comingSoon) {
-    return (
-      <div className="group rounded-2xl border border-border bg-card p-4 opacity-60">
-        {body}
-      </div>
-    );
-  }
-
-  return (
-    <Link to={to!} className="group rounded-2xl border border-border bg-card p-4 transition-all hover:border-primary/50 hover:bg-card/80">
-      {body}
-    </Link>
   );
 }
