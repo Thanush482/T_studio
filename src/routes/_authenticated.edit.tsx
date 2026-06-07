@@ -133,10 +133,15 @@ function EditPage() {
 
       <div className="aspect-square w-full overflow-hidden rounded-2xl border border-border bg-card">
         {image ? (
-          <img src={image} alt="Edited artwork" className="h-full w-full object-cover" />
+          <img src={image} alt="Edited artwork" className="h-full w-full object-cover animate-fade-in" />
+        ) : mutation.isPending ? (
+          <div className="flex h-full flex-col items-center justify-center gap-3">
+            <div className="h-16 w-16 animate-shimmer rounded-xl" />
+            <p className="text-sm text-muted-foreground">Working on it…</p>
+          </div>
         ) : (
           <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-            {mutation.isPending ? "Working on it…" : "Your edited image will appear here"}
+            Your edited image will appear here
           </div>
         )}
       </div>

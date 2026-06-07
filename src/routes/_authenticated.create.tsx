@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { generateImage } from "@/lib/ai.functions";
+import { FadeIn } from "@/components/FadeIn";
 
 export const Route = createFileRoute("/_authenticated/create")({
   head: () => ({ meta: [{ title: "Create — T_AI Studio" }] }),
@@ -78,10 +79,15 @@ function CreatePage() {
 
       <div className="aspect-square w-full overflow-hidden rounded-2xl border border-border bg-card">
         {image ? (
-          <img src={image} alt="Generated artwork" className="h-full w-full object-cover" />
+          <img src={image} alt="Generated artwork" className="h-full w-full object-cover animate-fade-in" />
+        ) : mutation.isPending ? (
+          <div className="flex h-full flex-col items-center justify-center gap-3">
+            <div className="h-16 w-16 animate-shimmer rounded-xl" />
+            <p className="text-sm text-muted-foreground">Working on it…</p>
+          </div>
         ) : (
           <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-            {mutation.isPending ? "Working on it…" : "Your image will appear here"}
+            Your image will appear here
           </div>
         )}
       </div>
