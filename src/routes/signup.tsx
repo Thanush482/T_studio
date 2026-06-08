@@ -47,7 +47,7 @@ function SignupPage() {
       return;
     }
     if (r.redirected) return;
-    navigate({ to: "/home" });
+    navigate({ to: "/home", replace: true });
   }
 
   return (

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Sparkles, Loader2, Download } from "lucide-react";
 import { toast } from "sonner";
 
@@ -26,6 +26,14 @@ function CreatePage() {
   const [image, setImage] = useState<string | null>(null);
   const queryClient = useQueryClient();
   const runGen = useServerFn(generateImage);
+
+  useEffect(() => {
+    const reuse = sessionStorage.getItem("tai:reuse-prompt");
+    if (reuse) {
+      setPrompt(reuse);
+      sessionStorage.removeItem("tai:reuse-prompt");
+    }
+  }, []);
 
   const mutation = useMutation({
     mutationFn: async (p: string) => runGen({ data: { prompt: p } }),

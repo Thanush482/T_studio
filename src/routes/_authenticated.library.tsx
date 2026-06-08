@@ -1,7 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ImageIcon } from "lucide-react";
+import { ImageIcon, Sparkles, Wand2 } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/library")({
   head: () => ({ meta: [{ title: "Library — T_AI Studio" }] }),
@@ -11,6 +12,7 @@ export const Route = createFileRoute("/_authenticated/library")({
 type Gen = { id: string; prompt: string; output_asset_path: string | null; output_url: string | null; created_at: string };
 
 function LibraryPage() {
+  const navigate = useNavigate();
   const { data, isLoading } = useQuery({
     queryKey: ["library"],
     queryFn: async (): Promise<Array<Gen & { signedUrl: string | null }>> => {
@@ -33,6 +35,30 @@ function LibraryPage() {
       return withUrls;
     },
   });
+
+  async function reusePrompt(prompt: string) {
+    sessionStorage.setItem("tai:reuse-prompt", prompt);
+    navigate({ to: "/create" });
+  }
+
+  async function editThis(url: string | null, prompt: string) {
+    if (!url) return toast.error("Image not available");
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === "string") {
+          sessionStorage.setItem("tai:reuse-image", reader.result);
+          sessionStorage.setItem("tai:reuse-prompt", prompt);
+          navigate({ to: "/edit" });
+        }
+      };
+      reader.readAsDataURL(blob);
+    } catch {
+      toast.error("Could not load that image");
+    }
+  }
 
   return (
     <div className="space-y-4">
@@ -66,6 +92,20 @@ function LibraryPage() {
                 ) : null}
               </div>
               <p className="line-clamp-2 px-2 py-1.5 text-[11px] text-muted-foreground">{g.prompt}</p>
+              <div className="flex gap-1 border-t border-border p-1.5">
+                <button
+                  onClick={() => reusePrompt(g.prompt)}
+                  className="flex flex-1 items-center justify-center gap-1 rounded-md px-2 py-1.5 text-[11px] font-medium text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                >
+                  <Sparkles className="h-3 w-3" /> Reuse
+                </button>
+                <button
+                  onClick={() => editThis(g.signedUrl, g.prompt)}
+                  className="flex flex-1 items-center justify-center gap-1 rounded-md px-2 py-1.5 text-[11px] font-medium text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                >
+                  <Wand2 className="h-3 w-3" /> Edit
+                </button>
+              </div>
             </div>
           ))}
         </div>

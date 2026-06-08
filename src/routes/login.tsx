@@ -25,7 +25,7 @@ function LoginPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) return toast.error(error.message);
-    navigate({ to: "/home" });
+    navigate({ to: "/home", replace: true });
   }
 
   async function onGoogle() {
@@ -37,7 +37,7 @@ function LoginPage() {
       return;
     }
     if (r.redirected) return;
-    navigate({ to: "/home" });
+    navigate({ to: "/home", replace: true });
   }
 
   return (
