@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Loader2, Download, Wand2, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 
@@ -27,6 +27,19 @@ function EditPage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
   const runEdit = useServerFn(editImage);
+
+  useEffect(() => {
+    const reuseImg = sessionStorage.getItem("tai:reuse-image");
+    const reusePrompt = sessionStorage.getItem("tai:reuse-prompt");
+    if (reuseImg) {
+      setSourceDataUrl(reuseImg);
+      sessionStorage.removeItem("tai:reuse-image");
+    }
+    if (reusePrompt) {
+      setPrompt(reusePrompt);
+      sessionStorage.removeItem("tai:reuse-prompt");
+    }
+  }, []);
 
   const mutation = useMutation({
     mutationFn: async (p: string) => {
