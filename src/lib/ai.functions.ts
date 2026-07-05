@@ -7,6 +7,38 @@ import { downloadToStorage, falRun, replicateRun, uploadDataUrl } from "./provid
 
 const GATEWAY = "https://ai.gateway.lovable.dev/v1";
 
+// ─── Text-to-Speech (Lovable AI) ────────────────────────────────────────────
+const TTSSchema = z.object({
+  text: z.string().min(1).max(4000),
+  voice: z.enum(["alloy", "echo", "fable", "onyx", "nova", "shimmer"]).default("alloy"),
+});
+
+export const synthesizeSpeech = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => TTSSchema.parse(d))
+  .handler(async ({ data }) => {
+    const apiKey = process.env.LOVABLE_API_KEY;
+    if (!apiKey) throw new Error("AI gateway not configured");
+    const res = await fetch(`${GATEWAY}/audio/speech`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "openai/gpt-4o-mini-tts",
+        input: data.text,
+        voice: data.voice,
+        response_format: "mp3",
+      }),
+    });
+    if (!res.ok) {
+      if (res.status === 429) throw new Error("Too many requests — please slow down.");
+      if (res.status === 402) throw new Error("AI credits exhausted. Try again later.");
+      throw new Error(`Speech generation failed (${res.status})`);
+    }
+    const buf = new Uint8Array(await res.arrayBuffer());
+    const base64 = btoa(String.fromCharCode(...buf));
+    return { audioUrl: `data:audio/mpeg;base64,${base64}` };
+  });
+
 const MODERATION_SYSTEM = `You are a strict safety classifier for T_AI Studio, an AI image generator.
 Return ONLY one word: "allow" or "block".
 Block if the prompt requests any of:
