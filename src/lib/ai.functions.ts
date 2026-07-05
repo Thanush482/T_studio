@@ -35,7 +35,12 @@ export const synthesizeSpeech = createServerFn({ method: "POST" })
       throw new Error(`Speech generation failed (${res.status})`);
     }
     const buf = new Uint8Array(await res.arrayBuffer());
-    const base64 = btoa(String.fromCharCode(...buf));
+    let binary = "";
+    const chunk = 0x8000;
+    for (let i = 0; i < buf.length; i += chunk) {
+      binary += String.fromCharCode(...buf.subarray(i, i + chunk));
+    }
+    const base64 = btoa(binary);
     return { audioUrl: `data:audio/mpeg;base64,${base64}` };
   });
 
