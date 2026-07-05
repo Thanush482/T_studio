@@ -19,6 +19,7 @@ import { Route as LegalTermsRouteImport } from './routes/legal.terms'
 import { Route as LegalTakedownRouteImport } from './routes/legal.takedown'
 import { Route as LegalPrivacyRouteImport } from './routes/legal.privacy'
 import { Route as LegalAcceptableUseRouteImport } from './routes/legal.acceptable-use'
+import { Route as AuthenticatedVoiceRouteImport } from './routes/_authenticated.voice'
 import { Route as AuthenticatedVideoRouteImport } from './routes/_authenticated.video'
 import { Route as AuthenticatedTrainRouteImport } from './routes/_authenticated.train'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated.profile'
@@ -78,6 +79,11 @@ const LegalAcceptableUseRoute = LegalAcceptableUseRouteImport.update({
   id: '/legal/acceptable-use',
   path: '/legal/acceptable-use',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedVoiceRoute = AuthenticatedVoiceRouteImport.update({
+  id: '/voice',
+  path: '/voice',
+  getParentRoute: () => AuthenticatedRoute,
 } as any)
 const AuthenticatedVideoRoute = AuthenticatedVideoRouteImport.update({
   id: '/video',
@@ -145,6 +151,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof AuthenticatedProfileRoute
   '/train': typeof AuthenticatedTrainRoute
   '/video': typeof AuthenticatedVideoRoute
+  '/voice': typeof AuthenticatedVoiceRoute
   '/legal/acceptable-use': typeof LegalAcceptableUseRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/takedown': typeof LegalTakedownRoute
@@ -166,6 +173,7 @@ export interface FileRoutesByTo {
   '/profile': typeof AuthenticatedProfileRoute
   '/train': typeof AuthenticatedTrainRoute
   '/video': typeof AuthenticatedVideoRoute
+  '/voice': typeof AuthenticatedVoiceRoute
   '/legal/acceptable-use': typeof LegalAcceptableUseRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/takedown': typeof LegalTakedownRoute
@@ -189,6 +197,7 @@ export interface FileRoutesById {
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/train': typeof AuthenticatedTrainRoute
   '/_authenticated/video': typeof AuthenticatedVideoRoute
+  '/_authenticated/voice': typeof AuthenticatedVoiceRoute
   '/legal/acceptable-use': typeof LegalAcceptableUseRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/takedown': typeof LegalTakedownRoute
@@ -212,6 +221,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/train'
     | '/video'
+    | '/voice'
     | '/legal/acceptable-use'
     | '/legal/privacy'
     | '/legal/takedown'
@@ -233,6 +243,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/train'
     | '/video'
+    | '/voice'
     | '/legal/acceptable-use'
     | '/legal/privacy'
     | '/legal/takedown'
@@ -255,6 +266,7 @@ export interface FileRouteTypes {
     | '/_authenticated/profile'
     | '/_authenticated/train'
     | '/_authenticated/video'
+    | '/_authenticated/voice'
     | '/legal/acceptable-use'
     | '/legal/privacy'
     | '/legal/takedown'
@@ -348,6 +360,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LegalAcceptableUseRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/voice': {
+      id: '/_authenticated/voice'
+      path: '/voice'
+      fullPath: '/voice'
+      preLoaderRoute: typeof AuthenticatedVoiceRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/video': {
       id: '/_authenticated/video'
       path: '/video'
@@ -431,6 +450,7 @@ interface AuthenticatedRouteChildren {
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedTrainRoute: typeof AuthenticatedTrainRoute
   AuthenticatedVideoRoute: typeof AuthenticatedVideoRoute
+  AuthenticatedVoiceRoute: typeof AuthenticatedVoiceRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
@@ -443,6 +463,7 @@ const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedTrainRoute: AuthenticatedTrainRoute,
   AuthenticatedVideoRoute: AuthenticatedVideoRoute,
+  AuthenticatedVoiceRoute: AuthenticatedVoiceRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
