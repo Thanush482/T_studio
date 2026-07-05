@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Sparkles, ImageIcon, Wand2, Users, Shirt, Film, Brain } from "lucide-react";
+import { Sparkles, ImageIcon, Wand2, Users, Mic, Film, Brain } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { FadeIn } from "@/components/FadeIn";
 
@@ -46,7 +46,7 @@ function HomePage() {
             { to: "/create" as const, icon: <Sparkles className="h-6 w-6" />, title: "Text to Image", desc: "Describe an image" },
             { to: "/edit" as const, icon: <Wand2 className="h-6 w-6" />, title: "Edit with prompt", desc: "Transform a photo" },
             { comingSoon: true, icon: <Users className="h-6 w-6" />, title: "Face Swap", desc: "Swap faces in photos" },
-            { comingSoon: true, icon: <Shirt className="h-6 w-6" />, title: "Outfit Swap", desc: "Try-on a garment" },
+            { to: "/voice" as const, icon: <Mic className="h-6 w-6" />, title: "Voice Studio", desc: "Speak, change & clone voices" },
             { comingSoon: true, icon: <Film className="h-6 w-6" />, title: "AI Video", desc: "Text to short video" },
             { comingSoon: true, icon: <Brain className="h-6 w-6" />, title: "Train model", desc: "Your own AI subject" },
             { to: "/library" as const, icon: <ImageIcon className="h-6 w-6" />, title: "Your library", desc: "All your creations" },
