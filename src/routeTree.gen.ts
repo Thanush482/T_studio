@@ -19,6 +19,7 @@ import { Route as LegalTermsRouteImport } from './routes/legal.terms'
 import { Route as LegalTakedownRouteImport } from './routes/legal.takedown'
 import { Route as LegalPrivacyRouteImport } from './routes/legal.privacy'
 import { Route as LegalAcceptableUseRouteImport } from './routes/legal.acceptable-use'
+import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
 import { Route as AuthenticatedVoiceRouteImport } from './routes/_authenticated.voice'
 import { Route as AuthenticatedVideoRouteImport } from './routes/_authenticated.video'
 import { Route as AuthenticatedTrainRouteImport } from './routes/_authenticated.train'
@@ -78,6 +79,11 @@ const LegalPrivacyRoute = LegalPrivacyRouteImport.update({
 const LegalAcceptableUseRoute = LegalAcceptableUseRouteImport.update({
   id: '/legal/acceptable-use',
   path: '/legal/acceptable-use',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTranscribeRoute = ApiTranscribeRouteImport.update({
+  id: '/api/transcribe',
+  path: '/api/transcribe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedVoiceRoute = AuthenticatedVoiceRouteImport.update({
@@ -152,6 +158,7 @@ export interface FileRoutesByFullPath {
   '/train': typeof AuthenticatedTrainRoute
   '/video': typeof AuthenticatedVideoRoute
   '/voice': typeof AuthenticatedVoiceRoute
+  '/api/transcribe': typeof ApiTranscribeRoute
   '/legal/acceptable-use': typeof LegalAcceptableUseRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/takedown': typeof LegalTakedownRoute
@@ -174,6 +181,7 @@ export interface FileRoutesByTo {
   '/train': typeof AuthenticatedTrainRoute
   '/video': typeof AuthenticatedVideoRoute
   '/voice': typeof AuthenticatedVoiceRoute
+  '/api/transcribe': typeof ApiTranscribeRoute
   '/legal/acceptable-use': typeof LegalAcceptableUseRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/takedown': typeof LegalTakedownRoute
@@ -198,6 +206,7 @@ export interface FileRoutesById {
   '/_authenticated/train': typeof AuthenticatedTrainRoute
   '/_authenticated/video': typeof AuthenticatedVideoRoute
   '/_authenticated/voice': typeof AuthenticatedVoiceRoute
+  '/api/transcribe': typeof ApiTranscribeRoute
   '/legal/acceptable-use': typeof LegalAcceptableUseRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/takedown': typeof LegalTakedownRoute
@@ -222,6 +231,7 @@ export interface FileRouteTypes {
     | '/train'
     | '/video'
     | '/voice'
+    | '/api/transcribe'
     | '/legal/acceptable-use'
     | '/legal/privacy'
     | '/legal/takedown'
@@ -244,6 +254,7 @@ export interface FileRouteTypes {
     | '/train'
     | '/video'
     | '/voice'
+    | '/api/transcribe'
     | '/legal/acceptable-use'
     | '/legal/privacy'
     | '/legal/takedown'
@@ -267,6 +278,7 @@ export interface FileRouteTypes {
     | '/_authenticated/train'
     | '/_authenticated/video'
     | '/_authenticated/voice'
+    | '/api/transcribe'
     | '/legal/acceptable-use'
     | '/legal/privacy'
     | '/legal/takedown'
@@ -281,6 +293,7 @@ export interface RootRouteChildren {
   ReportRoute: typeof ReportRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
+  ApiTranscribeRoute: typeof ApiTranscribeRoute
   LegalAcceptableUseRoute: typeof LegalAcceptableUseRoute
   LegalPrivacyRoute: typeof LegalPrivacyRoute
   LegalTakedownRoute: typeof LegalTakedownRoute
@@ -358,6 +371,13 @@ declare module '@tanstack/react-router' {
       path: '/legal/acceptable-use'
       fullPath: '/legal/acceptable-use'
       preLoaderRoute: typeof LegalAcceptableUseRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/transcribe': {
+      id: '/api/transcribe'
+      path: '/api/transcribe'
+      fullPath: '/api/transcribe'
+      preLoaderRoute: typeof ApiTranscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/voice': {
@@ -477,6 +497,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReportRoute: ReportRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
+  ApiTranscribeRoute: ApiTranscribeRoute,
   LegalAcceptableUseRoute: LegalAcceptableUseRoute,
   LegalPrivacyRoute: LegalPrivacyRoute,
   LegalTakedownRoute: LegalTakedownRoute,
@@ -486,13 +507,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
