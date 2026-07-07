@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useMutation } from "@tanstack/react-query";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { synthesizeSpeech } from "@/lib/ai.functions";
 import { toast } from "sonner";
-import { Loader2, Mic, Wand2, UserRound, Volume2 } from "lucide-react";
+import { Loader2, Mic, Wand2, UserRound, Volume2, Square, Upload, Copy } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/voice")({
   head: () => ({
@@ -33,7 +33,7 @@ function VoicePage() {
           <TabsTrigger value="tts"><Volume2 className="mr-1 h-4 w-4" />Speak</TabsTrigger>
           <TabsTrigger value="change"><Wand2 className="mr-1 h-4 w-4" />Change</TabsTrigger>
           <TabsTrigger value="clone"><UserRound className="mr-1 h-4 w-4" />Clone</TabsTrigger>
-          <TabsTrigger value="audio"><Mic className="mr-1 h-4 w-4" />Audio</TabsTrigger>
+          <TabsTrigger value="audio"><Mic className="mr-1 h-4 w-4" />Transcribe</TabsTrigger>
         </TabsList>
 
         <TabsContent value="tts" className="mt-4">
@@ -52,10 +52,7 @@ function VoicePage() {
           />
         </TabsContent>
         <TabsContent value="audio" className="mt-4">
-          <Placeholder
-            title="Audio & Sound FX"
-            desc="Generate music tracks and sound effects from a text description."
-          />
+          <Transcribe />
         </TabsContent>
       </Tabs>
     </div>
