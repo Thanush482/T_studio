@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { synthesizeSpeech } from "@/lib/ai.functions";
 import { toast } from "sonner";
-import { Loader2, Mic, Wand2, UserRound, Volume2, Square, Upload, Copy, Music4 } from "lucide-react";
+import { Loader2, Wand2, UserRound, Volume2, Upload, Music4 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/_authenticated/voice")({
@@ -30,12 +30,11 @@ function VoicePage() {
       </header>
 
       <Tabs defaultValue="tts">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="tts"><Volume2 className="mr-1 h-4 w-4" />Speak</TabsTrigger>
           <TabsTrigger value="change"><Wand2 className="mr-1 h-4 w-4" />Change</TabsTrigger>
           <TabsTrigger value="clone"><UserRound className="mr-1 h-4 w-4" />Clone</TabsTrigger>
           <TabsTrigger value="sfx"><Music4 className="mr-1 h-4 w-4" />SFX</TabsTrigger>
-          <TabsTrigger value="audio"><Mic className="mr-1 h-4 w-4" />Transcribe</TabsTrigger>
         </TabsList>
 
         <TabsContent value="tts" className="mt-4">
@@ -70,9 +69,6 @@ function VoicePage() {
             promptRequired
             showDuration
           />
-        </TabsContent>
-        <TabsContent value="audio" className="mt-4">
-          <Transcribe />
         </TabsContent>
       </Tabs>
     </div>
@@ -295,146 +291,6 @@ function FileField({ label, file, onFile }: { label: string; file: File | null; 
         className="hidden"
         onChange={(e) => onFile(e.target.files?.[0] ?? null)}
       />
-    </div>
-  );
-}
-
-function Transcribe() {
-  const [isRecording, setIsRecording] = useState(false);
-  const [isTranscribing, setIsTranscribing] = useState(false);
-  const [transcript, setTranscript] = useState<string>("");
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const recorderRef = useRef<MediaRecorder | null>(null);
-  const chunksRef = useRef<Blob[]>([]);
-  const streamRef = useRef<MediaStream | null>(null);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-
-  const transcribe = async (blob: Blob, mime: string) => {
-    if (blob.size < 1024) {
-      toast.error("Recording is empty — please try again.");
-      return;
-    }
-    setIsTranscribing(true);
-    setTranscript("");
-    try {
-      const fd = new FormData();
-      const ext = mime.includes("mp4") ? "mp4" : mime.includes("mpeg") || mime.includes("mp3") ? "mp3" : mime.includes("wav") ? "wav" : mime.includes("ogg") ? "ogg" : "webm";
-      fd.append("file", new File([blob], `recording.${ext}`, { type: mime || "audio/webm" }));
-      const res = await fetch("/api/transcribe", { method: "POST", body: fd });
-      if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(text || `Transcription failed (${res.status})`);
-      }
-      const json = (await res.json()) as { text?: string };
-      setTranscript(json.text ?? "");
-      if (!json.text?.trim()) toast.message("No speech detected in the recording.");
-    } catch (e) {
-      toast.error((e as Error).message);
-    } finally {
-      setIsTranscribing(false);
-    }
-  };
-
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      streamRef.current = stream;
-      const mime = MediaRecorder.isTypeSupported("audio/webm")
-        ? "audio/webm"
-        : MediaRecorder.isTypeSupported("audio/mp4")
-          ? "audio/mp4"
-          : "";
-      const rec = mime ? new MediaRecorder(stream, { mimeType: mime }) : new MediaRecorder(stream);
-      chunksRef.current = [];
-      rec.ondataavailable = (e) => { if (e.data.size > 0) chunksRef.current.push(e.data); };
-      rec.onstop = async () => {
-        streamRef.current?.getTracks().forEach((t) => t.stop());
-        streamRef.current = null;
-        const type = rec.mimeType || mime || "audio/webm";
-        const blob = new Blob(chunksRef.current, { type });
-        setAudioUrl(URL.createObjectURL(blob));
-        await transcribe(blob, type);
-      };
-      rec.start();
-      recorderRef.current = rec;
-      setIsRecording(true);
-    } catch {
-      toast.error("Microphone access is needed to record.");
-    }
-  };
-
-  const stopRecording = () => {
-    recorderRef.current?.stop();
-    setIsRecording(false);
-  };
-
-  const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setAudioUrl(URL.createObjectURL(file));
-    await transcribe(file, file.type);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  };
-
-  return (
-    <div className="space-y-4 rounded-2xl border border-border bg-card p-4">
-      <div>
-        <h3 className="font-display text-base font-semibold">Speech to text</h3>
-        <p className="text-xs text-muted-foreground">Record your voice or upload an audio file, and we'll transcribe it.</p>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3">
-        {isRecording ? (
-          <Button variant="destructive" onClick={stopRecording} className="w-full">
-            <Square className="mr-2 h-4 w-4" />Stop recording
-          </Button>
-        ) : (
-          <Button onClick={startRecording} disabled={isTranscribing} className="w-full">
-            <Mic className="mr-2 h-4 w-4" />Record
-          </Button>
-        )}
-        <Button
-          variant="secondary"
-          onClick={() => fileInputRef.current?.click()}
-          disabled={isRecording || isTranscribing}
-          className="w-full"
-        >
-          <Upload className="mr-2 h-4 w-4" />Upload audio
-        </Button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="audio/*"
-          className="hidden"
-          onChange={onFile}
-        />
-      </div>
-
-      {audioUrl && (
-        <audio controls src={audioUrl} className="w-full" />
-      )}
-
-      {isTranscribing && (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="h-4 w-4 animate-spin" />Transcribing…
-        </div>
-      )}
-
-      {transcript && (
-        <div className="space-y-2 rounded-xl border border-border bg-background/50 p-3">
-          <p className="whitespace-pre-wrap text-sm">{transcript}</p>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={() => {
-              navigator.clipboard.writeText(transcript);
-              toast.success("Copied to clipboard");
-            }}
-          >
-            <Copy className="mr-1 h-3 w-3" />Copy
-          </Button>
-        </div>
-      )}
     </div>
   );
 }

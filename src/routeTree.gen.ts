@@ -19,7 +19,6 @@ import { Route as LegalTermsRouteImport } from './routes/legal.terms'
 import { Route as LegalTakedownRouteImport } from './routes/legal.takedown'
 import { Route as LegalPrivacyRouteImport } from './routes/legal.privacy'
 import { Route as LegalAcceptableUseRouteImport } from './routes/legal.acceptable-use'
-import { Route as ApiTranscribeRouteImport } from './routes/api/transcribe'
 import { Route as ApiHfRouteImport } from './routes/api/hf'
 import { Route as AuthenticatedVoiceRouteImport } from './routes/_authenticated.voice'
 import { Route as AuthenticatedVideoRouteImport } from './routes/_authenticated.video'
@@ -80,11 +79,6 @@ const LegalPrivacyRoute = LegalPrivacyRouteImport.update({
 const LegalAcceptableUseRoute = LegalAcceptableUseRouteImport.update({
   id: '/legal/acceptable-use',
   path: '/legal/acceptable-use',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiTranscribeRoute = ApiTranscribeRouteImport.update({
-  id: '/api/transcribe',
-  path: '/api/transcribe',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiHfRoute = ApiHfRouteImport.update({
@@ -165,7 +159,6 @@ export interface FileRoutesByFullPath {
   '/video': typeof AuthenticatedVideoRoute
   '/voice': typeof AuthenticatedVoiceRoute
   '/api/hf': typeof ApiHfRoute
-  '/api/transcribe': typeof ApiTranscribeRoute
   '/legal/acceptable-use': typeof LegalAcceptableUseRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/takedown': typeof LegalTakedownRoute
@@ -189,7 +182,6 @@ export interface FileRoutesByTo {
   '/video': typeof AuthenticatedVideoRoute
   '/voice': typeof AuthenticatedVoiceRoute
   '/api/hf': typeof ApiHfRoute
-  '/api/transcribe': typeof ApiTranscribeRoute
   '/legal/acceptable-use': typeof LegalAcceptableUseRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/takedown': typeof LegalTakedownRoute
@@ -215,7 +207,6 @@ export interface FileRoutesById {
   '/_authenticated/video': typeof AuthenticatedVideoRoute
   '/_authenticated/voice': typeof AuthenticatedVoiceRoute
   '/api/hf': typeof ApiHfRoute
-  '/api/transcribe': typeof ApiTranscribeRoute
   '/legal/acceptable-use': typeof LegalAcceptableUseRoute
   '/legal/privacy': typeof LegalPrivacyRoute
   '/legal/takedown': typeof LegalTakedownRoute
@@ -241,7 +232,6 @@ export interface FileRouteTypes {
     | '/video'
     | '/voice'
     | '/api/hf'
-    | '/api/transcribe'
     | '/legal/acceptable-use'
     | '/legal/privacy'
     | '/legal/takedown'
@@ -265,7 +255,6 @@ export interface FileRouteTypes {
     | '/video'
     | '/voice'
     | '/api/hf'
-    | '/api/transcribe'
     | '/legal/acceptable-use'
     | '/legal/privacy'
     | '/legal/takedown'
@@ -290,7 +279,6 @@ export interface FileRouteTypes {
     | '/_authenticated/video'
     | '/_authenticated/voice'
     | '/api/hf'
-    | '/api/transcribe'
     | '/legal/acceptable-use'
     | '/legal/privacy'
     | '/legal/takedown'
@@ -306,7 +294,6 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SignupRoute: typeof SignupRoute
   ApiHfRoute: typeof ApiHfRoute
-  ApiTranscribeRoute: typeof ApiTranscribeRoute
   LegalAcceptableUseRoute: typeof LegalAcceptableUseRoute
   LegalPrivacyRoute: typeof LegalPrivacyRoute
   LegalTakedownRoute: typeof LegalTakedownRoute
@@ -384,13 +371,6 @@ declare module '@tanstack/react-router' {
       path: '/legal/acceptable-use'
       fullPath: '/legal/acceptable-use'
       preLoaderRoute: typeof LegalAcceptableUseRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/transcribe': {
-      id: '/api/transcribe'
-      path: '/api/transcribe'
-      fullPath: '/api/transcribe'
-      preLoaderRoute: typeof ApiTranscribeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/hf': {
@@ -518,7 +498,6 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SignupRoute: SignupRoute,
   ApiHfRoute: ApiHfRoute,
-  ApiTranscribeRoute: ApiTranscribeRoute,
   LegalAcceptableUseRoute: LegalAcceptableUseRoute,
   LegalPrivacyRoute: LegalPrivacyRoute,
   LegalTakedownRoute: LegalTakedownRoute,
