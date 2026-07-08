@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { synthesizeSpeech } from "@/lib/ai.functions";
 import { toast } from "sonner";
-import { Loader2, Mic, Wand2, UserRound, Volume2, Square, Upload, Copy, Music4 } from "lucide-react";
+import { Loader2, Wand2, UserRound, Volume2, Square, Upload, Copy, Music4 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/_authenticated/voice")({
@@ -30,11 +30,11 @@ function VoicePage() {
       </header>
 
       <Tabs defaultValue="tts">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="tts"><Volume2 className="mr-1 h-4 w-4" />Speak</TabsTrigger>
           <TabsTrigger value="change"><Wand2 className="mr-1 h-4 w-4" />Change</TabsTrigger>
           <TabsTrigger value="clone"><UserRound className="mr-1 h-4 w-4" />Clone</TabsTrigger>
-          <TabsTrigger value="sfx"><Music4 className="mr-1 h-4 w-4" />SFX</TabsTrigger>
+          <TabsTrigger value="audio"><Music4 className="mr-1 h-4 w-4" />SFX</TabsTrigger>
           <TabsTrigger value="audio"><Mic className="mr-1 h-4 w-4" />Transcribe</TabsTrigger>
         </TabsList>
 
