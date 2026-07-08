@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 import { synthesizeSpeech } from "@/lib/ai.functions";
 import { toast } from "sonner";
-import { Loader2, Mic, Wand2, UserRound, Volume2, Square, Upload, Copy } from "lucide-react";
+import { Loader2, Mic, Wand2, UserRound, Volume2, Square, Upload, Copy, Music4 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/_authenticated/voice")({
   head: () => ({
@@ -29,10 +30,11 @@ function VoicePage() {
       </header>
 
       <Tabs defaultValue="tts">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="tts"><Volume2 className="mr-1 h-4 w-4" />Speak</TabsTrigger>
           <TabsTrigger value="change"><Wand2 className="mr-1 h-4 w-4" />Change</TabsTrigger>
           <TabsTrigger value="clone"><UserRound className="mr-1 h-4 w-4" />Clone</TabsTrigger>
+          <TabsTrigger value="sfx"><Music4 className="mr-1 h-4 w-4" />SFX</TabsTrigger>
           <TabsTrigger value="audio"><Mic className="mr-1 h-4 w-4" />Transcribe</TabsTrigger>
         </TabsList>
 
@@ -40,15 +42,33 @@ function VoicePage() {
           <TextToSpeech />
         </TabsContent>
         <TabsContent value="change" className="mt-4">
-          <Placeholder
+          <HfPanel
+            kind="change"
             title="Voice Change"
-            desc="Upload a recorded voice and transform it — old, young, child, male, female, or a stylised character voice."
+            desc="Upload a source voice and (optionally) a reference target voice. Powered by your Hugging Face RVC Space."
+            needsSource
+            needsRef
+            promptLabel="Or describe the target style (used if no reference)"
           />
         </TabsContent>
         <TabsContent value="clone" className="mt-4">
-          <Placeholder
+          <HfPanel
+            kind="clone"
             title="Voice Clone"
-            desc="Clone any voice from a short sample (with the owner's explicit consent) and have it speak any text you write."
+            desc="Upload a short reference (5–15s) and type what you want it to say. Powered by your Hugging Face Chatterbox / Fish Audio Space."
+            needsRef
+            promptLabel="Text to speak"
+            promptRequired
+          />
+        </TabsContent>
+        <TabsContent value="sfx" className="mt-4">
+          <HfPanel
+            kind="sfx"
+            title="Sound Effects"
+            desc="Describe a sound and generate it. Powered by your Hugging Face AudioLDM 2 / Tango Space."
+            promptLabel="Describe the sound"
+            promptRequired
+            showDuration
           />
         </TabsContent>
         <TabsContent value="audio" className="mt-4">
