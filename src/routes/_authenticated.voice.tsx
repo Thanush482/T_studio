@@ -166,6 +166,139 @@ function Placeholder({ title, desc }: { title: string; desc: string }) {
   );
 }
 
+function HfPanel({
+  kind,
+  title,
+  desc,
+  needsSource,
+  needsRef,
+  promptLabel,
+  promptRequired,
+  showDuration,
+}: {
+  kind: "clone" | "change" | "sfx";
+  title: string;
+  desc: string;
+  needsSource?: boolean;
+  needsRef?: boolean;
+  promptLabel?: string;
+  promptRequired?: boolean;
+  showDuration?: boolean;
+}) {
+  const [prompt, setPrompt] = useState("");
+  const [apiName, setApiName] = useState("/predict");
+  const [duration, setDuration] = useState(5);
+  const [source, setSource] = useState<File | null>(null);
+  const [ref, setRef] = useState<File | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const run = async () => {
+    if (needsSource && !source) return toast.error("Please upload a source audio file.");
+    if (needsRef && !ref) return toast.error("Please upload a reference audio file.");
+    if (promptRequired && !prompt.trim()) return toast.error("Please enter a prompt.");
+    setBusy(true);
+    setAudioUrl(null);
+    try {
+      const fd = new FormData();
+      fd.append("kind", kind);
+      fd.append("apiName", apiName || "/predict");
+      fd.append("prompt", prompt);
+      if (source) fd.append("file", source);
+      if (ref) fd.append("refFile", ref);
+      if (showDuration) fd.append("extra", JSON.stringify({ duration }));
+      const res = await fetch("/api/hf", { method: "POST", body: fd });
+      if (!res.ok) throw new Error((await res.text()) || `Failed (${res.status})`);
+      const json = (await res.json()) as { audioUrl?: string; error?: string };
+      if (!json.audioUrl) throw new Error(json.error || "No audio returned");
+      setAudioUrl(json.audioUrl);
+      toast.success("Done");
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4 rounded-2xl border border-border bg-card p-4">
+      <div>
+        <h3 className="font-display text-base font-semibold">{title}</h3>
+        <p className="text-xs text-muted-foreground">{desc}</p>
+      </div>
+
+      {promptLabel && (
+        <div className="space-y-2">
+          <label className="text-sm font-medium">{promptLabel}</label>
+          <Textarea value={prompt} onChange={(e) => setPrompt(e.target.value)} rows={3} />
+        </div>
+      )}
+
+      {needsSource && (
+        <FileField label="Source audio" file={source} onFile={setSource} />
+      )}
+      {needsRef && (
+        <FileField label={kind === "change" ? "Target reference (optional)" : "Reference voice sample"} file={ref} onFile={setRef} />
+      )}
+
+      {showDuration && (
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Duration (seconds)</label>
+          <Input
+            type="number"
+            min={1}
+            max={30}
+            value={duration}
+            onChange={(e) => setDuration(Number(e.target.value) || 5)}
+          />
+        </div>
+      )}
+
+      <details className="text-xs text-muted-foreground">
+        <summary className="cursor-pointer">Advanced</summary>
+        <div className="mt-2 space-y-1">
+          <label className="text-xs">Gradio API endpoint name</label>
+          <Input value={apiName} onChange={(e) => setApiName(e.target.value)} placeholder="/predict" />
+          <p className="text-[11px]">Change if your Space exposes a different function (e.g. <code>/generate</code>, <code>/infer</code>).</p>
+        </div>
+      </details>
+
+      <Button onClick={run} disabled={busy} className="w-full">
+        {busy ? (<><Loader2 className="mr-2 h-4 w-4 animate-spin" />Generating…</>) : (<><Wand2 className="mr-2 h-4 w-4" />Generate</>)}
+      </Button>
+
+      {audioUrl && (
+        <div className="space-y-2 rounded-xl border border-border bg-background/50 p-3">
+          <audio controls src={audioUrl} className="w-full" />
+          <a href={audioUrl} download className="text-xs text-primary underline">Download</a>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function FileField({ label, file, onFile }: { label: string; file: File | null; onFile: (f: File | null) => void }) {
+  const ref = useRef<HTMLInputElement | null>(null);
+  return (
+    <div className="space-y-2">
+      <label className="text-sm font-medium">{label}</label>
+      <div className="flex items-center gap-2">
+        <Button type="button" variant="secondary" size="sm" onClick={() => ref.current?.click()}>
+          <Upload className="mr-1 h-3 w-3" />Choose file
+        </Button>
+        <span className="truncate text-xs text-muted-foreground">{file?.name ?? "No file"}</span>
+      </div>
+      <input
+        ref={ref}
+        type="file"
+        accept="audio/*"
+        className="hidden"
+        onChange={(e) => onFile(e.target.files?.[0] ?? null)}
+      />
+    </div>
+  );
+}
+
 function Transcribe() {
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
