@@ -1,20 +1,25 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Client } from "@gradio/client";
 
-type Kind = "clone" | "change" | "sfx";
+type Kind = "clone" | "change" | "sfx" | "faceswap-img" | "faceswap-vid" | "train";
 
 const URL_ENV: Record<Kind, string> = {
   clone: "HF_VOICE_CLONE_URL",
   change: "HF_VOICE_CHANGE_URL",
   sfx: "HF_SFX_URL",
+  "faceswap-img": "HF_FACESWAP_IMG_URL",
+  "faceswap-vid": "HF_FACESWAP_VID_URL",
+  train: "HF_TRAIN_URL",
 };
 
-function pickAudio(output: unknown): string | null {
+const MEDIA_RE = /\.(wav|mp3|ogg|flac|m4a|webm|png|jpg|jpeg|gif|webp|bmp|mp4|mov|mkv|avi|zip|safetensors|ckpt|bin|pt)(\?|$)/i;
+
+function pickMedia(output: unknown): string | null {
   const seen = new Set<unknown>();
   const walk = (v: unknown): string | null => {
     if (!v || seen.has(v)) return null;
     if (typeof v === "string") {
-      if (/^https?:\/\/.+\.(wav|mp3|ogg|flac|m4a|webm)(\?|$)/i.test(v)) return v;
+      if (/^https?:\/\/.+/.test(v) && MEDIA_RE.test(v)) return v;
       if (v.startsWith("http") && v.includes("/file")) return v;
       return null;
     }
@@ -69,19 +74,34 @@ export const Route = createFileRoute("/api/hf")({
             // Chatterbox / Fish Audio typical: (text, reference_audio)
             if (!(refFile instanceof File)) return new Response("Reference audio required", { status: 400 });
             inputs = [prompt, refFile];
-          } else {
+          } else if (kind === "change") {
             // voice change: (source_audio, target_reference_or_settings)
             if (!(file instanceof File)) return new Response("Source audio required", { status: 400 });
             inputs = refFile instanceof File ? [file, refFile] : [file, prompt];
+          } else if (kind === "faceswap-img") {
+            // ReActor / InsightFace typical: (source_face_image, target_image)
+            if (!(file instanceof File) || !(refFile instanceof File))
+              return new Response("Source face image and target image required", { status: 400 });
+            inputs = [file, refFile];
+          } else if (kind === "faceswap-vid") {
+            // Roop / FaceFusion typical: (source_face_image, target_video)
+            if (!(file instanceof File) || !(refFile instanceof File))
+              return new Response("Source face image and target video required", { status: 400 });
+            inputs = [file, refFile];
+          } else {
+            // train: expect a zip/tar of images + trigger word
+            if (!(file instanceof File)) return new Response("Training data (zip) required", { status: 400 });
+            const steps = Number(extra.steps ?? 1000);
+            inputs = [file, prompt || "sks", steps];
           }
 
           const result = await client.predict(apiName, inputs);
           const data = (result as { data: unknown }).data;
-          const audioUrl = pickAudio(data);
-          if (!audioUrl) {
-            return Response.json({ error: "No audio in response", raw: data }, { status: 502 });
+          const mediaUrl = pickMedia(data);
+          if (!mediaUrl) {
+            return Response.json({ error: "No media in response", raw: data }, { status: 502 });
           }
-          return Response.json({ audioUrl });
+          return Response.json({ audioUrl: mediaUrl, mediaUrl });
         } catch (e) {
           console.error("hf proxy error", e);
           const msg = e instanceof Error ? e.message : "Unknown error";
