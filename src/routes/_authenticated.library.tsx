@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { ImageIcon, Sparkles, Wand2 } from "lucide-react";
+import { Film, ImageIcon, Sparkles, Wand2 } from "lucide-react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/library")({
@@ -60,6 +60,25 @@ function LibraryPage() {
     }
   }
 
+  async function useInVideo(url: string | null, prompt: string) {
+    if (!url) return toast.error("Source not available");
+    try {
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === "string") {
+          sessionStorage.setItem("tai:video-source", reader.result);
+          sessionStorage.setItem("tai:reuse-prompt", prompt);
+          navigate({ to: "/video" });
+        }
+      };
+      reader.readAsDataURL(blob);
+    } catch {
+      toast.error("Could not load that item");
+    }
+  }
+
   return (
     <div className="space-y-4">
       <h1 className="font-display text-2xl font-bold">Library</h1>
@@ -104,6 +123,12 @@ function LibraryPage() {
                   className="flex flex-1 items-center justify-center gap-1 rounded-md px-2 py-1.5 text-[11px] font-medium text-muted-foreground hover:bg-primary/10 hover:text-primary"
                 >
                   <Wand2 className="h-3 w-3" /> Edit
+                </button>
+                <button
+                  onClick={() => useInVideo(g.signedUrl, g.prompt)}
+                  className="flex flex-1 items-center justify-center gap-1 rounded-md px-2 py-1.5 text-[11px] font-medium text-muted-foreground hover:bg-primary/10 hover:text-primary"
+                >
+                  <Film className="h-3 w-3" /> Video
                 </button>
               </div>
             </div>
