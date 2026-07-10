@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-type Kind = "faceswap-img" | "faceswap-vid" | "train";
+type Kind = "faceswap-img" | "faceswap-vid" | "train" | "video";
 
 export function HfMediaPanel({
   kind,
@@ -17,17 +17,19 @@ export function HfMediaPanel({
   refAccept,
   promptLabel,
   showSteps,
+  showDuration,
   outputType,
 }: {
   kind: Kind;
   title: string;
   desc: string;
-  sourceLabel: string;
-  sourceAccept: string;
+  sourceLabel?: string;
+  sourceAccept?: string;
   refLabel?: string;
   refAccept?: string;
   promptLabel?: string;
   showSteps?: boolean;
+  showDuration?: boolean;
   outputType: "image" | "video" | "file";
 }) {
   const [source, setSource] = useState<File | null>(null);
@@ -35,12 +37,14 @@ export function HfMediaPanel({
   const [prompt, setPrompt] = useState("");
   const [apiName, setApiName] = useState("/predict");
   const [steps, setSteps] = useState(1000);
+  const [duration, setDuration] = useState(4);
   const [mediaUrl, setMediaUrl] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
   const run = async () => {
-    if (!source) return toast.error(`Please upload ${sourceLabel.toLowerCase()}.`);
+    if (sourceLabel && !source) return toast.error(`Please upload ${sourceLabel.toLowerCase()}.`);
     if (refLabel && !ref) return toast.error(`Please upload ${refLabel.toLowerCase()}.`);
+    if (promptLabel && !prompt.trim() && kind === "video") return toast.error("Please enter a prompt.");
     setBusy(true);
     setMediaUrl(null);
     try {
@@ -48,9 +52,10 @@ export function HfMediaPanel({
       fd.append("kind", kind);
       fd.append("apiName", apiName || "/predict");
       fd.append("prompt", prompt);
-      fd.append("file", source);
+      if (source) fd.append("file", source);
       if (ref) fd.append("refFile", ref);
       if (showSteps) fd.append("extra", JSON.stringify({ steps }));
+      if (showDuration) fd.append("extra", JSON.stringify({ duration }));
       const res = await fetch("/api/hf", { method: "POST", body: fd });
       if (!res.ok) throw new Error((await res.text()) || `Failed (${res.status})`);
       const json = (await res.json()) as { mediaUrl?: string; error?: string };
@@ -71,7 +76,9 @@ export function HfMediaPanel({
         <p className="text-xs text-muted-foreground">{desc}</p>
       </div>
 
-      <FileField label={sourceLabel} accept={sourceAccept} file={source} onFile={setSource} />
+      {sourceLabel && (
+        <FileField label={sourceLabel} accept={sourceAccept ?? "*/*"} file={source} onFile={setSource} />
+      )}
       {refLabel && (
         <FileField label={refLabel} accept={refAccept ?? "*/*"} file={ref} onFile={setRef} />
       )}
@@ -87,6 +94,13 @@ export function HfMediaPanel({
         <div className="space-y-2">
           <label className="text-sm font-medium">Training steps</label>
           <Input type="number" min={100} max={5000} value={steps} onChange={(e) => setSteps(Number(e.target.value) || 1000)} />
+        </div>
+      )}
+
+      {showDuration && (
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Duration (seconds)</label>
+          <Input type="number" min={1} max={30} value={duration} onChange={(e) => setDuration(Number(e.target.value) || 4)} />
         </div>
       )}
 

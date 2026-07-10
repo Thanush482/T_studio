@@ -47,7 +47,7 @@ function HomePage() {
             { to: "/edit" as const, icon: <Wand2 className="h-6 w-6" />, title: "Edit with prompt", desc: "Transform a photo" },
             { to: "/faceswap" as const, icon: <Users className="h-6 w-6" />, title: "Face Swap", desc: "Photos & videos" },
             { to: "/voice" as const, icon: <Mic className="h-6 w-6" />, title: "Voice Studio", desc: "Speak, change & clone voices" },
-            { comingSoon: true, icon: <Film className="h-6 w-6" />, title: "AI Video", desc: "Text to short video" },
+            { to: "/video" as const, icon: <Film className="h-6 w-6" />, title: "AI Video", desc: "Text to short video" },
             { to: "/train" as const, icon: <Brain className="h-6 w-6" />, title: "Train model", desc: "Your own AI subject" },
             { to: "/library" as const, icon: <ImageIcon className="h-6 w-6" />, title: "Your library", desc: "All your creations" },
             { to: "/profile" as const, icon: <Sparkles className="h-6 w-6" />, title: "Profile", desc: "Account & legal" },

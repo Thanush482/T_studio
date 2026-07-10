@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Client } from "@gradio/client";
 
-type Kind = "clone" | "change" | "sfx" | "faceswap-img" | "faceswap-vid" | "train";
+type Kind = "clone" | "change" | "sfx" | "faceswap-img" | "faceswap-vid" | "train" | "video";
 
 const URL_ENV: Record<Kind, string> = {
   clone: "HF_VOICE_CLONE_URL",
@@ -10,6 +10,7 @@ const URL_ENV: Record<Kind, string> = {
   "faceswap-img": "HF_FACESWAP_IMG_URL",
   "faceswap-vid": "HF_FACESWAP_VID_URL",
   train: "HF_TRAIN_URL",
+  video: "HF_VIDEO_URL",
 };
 
 const MEDIA_RE = /\.(wav|mp3|ogg|flac|m4a|webm|png|jpg|jpeg|gif|webp|bmp|mp4|mov|mkv|avi|zip|safetensors|ckpt|bin|pt)(\?|$)/i;
@@ -88,6 +89,11 @@ export const Route = createFileRoute("/api/hf")({
             if (!(file instanceof File) || !(refFile instanceof File))
               return new Response("Source face image and target video required", { status: 400 });
             inputs = [file, refFile];
+          } else if (kind === "video") {
+            // text-to-video: (prompt, [duration|seconds|frames])
+            if (!prompt) return new Response("Prompt required", { status: 400 });
+            const duration = Number(extra.duration ?? 4);
+            inputs = [prompt, duration];
           } else {
             // train: expect a zip/tar of images + trigger word
             if (!(file instanceof File)) return new Response("Training data (zip) required", { status: 400 });
