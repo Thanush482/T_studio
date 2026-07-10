@@ -90,10 +90,10 @@ export const Route = createFileRoute("/api/hf")({
               return new Response("Source face image and target video required", { status: 400 });
             inputs = [file, refFile];
           } else if (kind === "video") {
-            // text-to-video: (prompt, [duration|seconds|frames])
+            // text/image/video-to-video: (prompt, [file], duration)
             if (!prompt) return new Response("Prompt required", { status: 400 });
             const duration = Number(extra.duration ?? 4);
-            inputs = [prompt, duration];
+            inputs = file instanceof File ? [prompt, file, duration] : [prompt, duration];
           } else {
             // train: expect a zip/tar of images + trigger word
             if (!(file instanceof File)) return new Response("Training data (zip) required", { status: 400 });
