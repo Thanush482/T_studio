@@ -74,8 +74,9 @@ export const Route = createFileRoute("/api/hf")({
             return Response.json(
               {
                 error: `Cannot reach Space for ${URL_ENV[kind]}. It may be sleeping, private, gated, or the URL is invalid. Details: ${m}`,
+                fallback: true,
               },
-              { status: 502 },
+              { status: 200 },
             );
           }
 
@@ -117,13 +118,13 @@ export const Route = createFileRoute("/api/hf")({
           const data = (result as { data: unknown }).data;
           const mediaUrl = pickMedia(data);
           if (!mediaUrl) {
-            return Response.json({ error: "No media in response", raw: data }, { status: 502 });
+            return Response.json({ error: "No media in response", raw: data, fallback: true }, { status: 200 });
           }
           return Response.json({ audioUrl: mediaUrl, mediaUrl });
         } catch (e) {
           console.error("hf proxy error", e);
           const msg = e instanceof Error ? e.message : "Unknown error";
-          return new Response(msg, { status: 500 });
+          return Response.json({ error: msg, fallback: true }, { status: 200 });
         }
       },
     },
