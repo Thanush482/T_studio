@@ -38,29 +38,11 @@ function Landing() {
           </Button>
         </div>
 
-        <ul className="mt-10 w-full space-y-3 text-left animate-fade-in" style={{ animationDelay: "0.4s" }}>
-          <Feature icon={<Wand2 className="h-5 w-5" />} title="Text-to-image" desc="Describe anything. Get a render in seconds." />
-          <Feature icon={<Sparkles className="h-5 w-5" />} title="Prompt-based edits" desc="Change backgrounds, outfits and more with words." />
-          <Feature icon={<ShieldCheck className="h-5 w-5" />} title="Safe by design" desc="Moderation, consent and watermarking built in." />
-        </ul>
-
-        <p className="mt-10 text-xs text-muted-foreground animate-fade-in" style={{ animationDelay: "0.5s" }}>
+        <p className="mt-10 text-xs text-muted-foreground animate-fade-in" style={{ animationDelay: "0.4s" }}>
           <Link to="/legal/terms" className="underline">Terms</Link> ·{" "}
           <Link to="/legal/privacy" className="underline">Privacy</Link>
         </p>
       </div>
     </div>
-  );
-}
-
-function Feature({ icon, title, desc }: { icon: React.ReactNode; title: string; desc: string }) {
-  return (
-    <li className="flex items-start gap-3 rounded-xl border border-border bg-card/50 p-3">
-      <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/15 text-primary">{icon}</div>
-      <div>
-        <p className="font-display text-sm font-semibold">{title}</p>
-        <p className="text-xs text-muted-foreground">{desc}</p>
-      </div>
-    </li>
   );
 }
