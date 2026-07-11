@@ -65,7 +65,19 @@ export const Route = createFileRoute("/api/hf")({
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const opts: any = hfToken ? { hf_token: hfToken } : {};
-          const client = await Client.connect(spaceUrl, opts);
+          let client;
+          try {
+            client = await Client.connect(spaceUrl, opts);
+          } catch (err) {
+            const m = err instanceof Error ? err.message : String(err);
+            console.error("gradio connect failed", URL_ENV[kind], spaceUrl, m);
+            return Response.json(
+              {
+                error: `Cannot reach Space for ${URL_ENV[kind]}. It may be sleeping, private, gated, or the URL is invalid. Details: ${m}`,
+              },
+              { status: 502 },
+            );
+          }
 
           let inputs: unknown[];
           if (kind === "sfx") {
